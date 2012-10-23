@@ -1,0 +1,28 @@
+selection operators
+m				Match
+v				inVert selection
+n				select by Number
+u       select Unique
+
+translation operators
+s				Substitution
+y				transliteration
+
+operators
+d				sunDer selected
+cs			Coalesce
+x				eXchange
+
+operators
+r				Reverse
+ss      Sort Strings (asc)
+sn			Sort Numeric (asc)
+
+filesystem operators
+ls			directory LiSting
+rp			path canonicalization (with RealPath)
+
+/* (-f) absolute or relative path to a plain file */
+/* (-d) absolute or relative path to a directory */
+/* (-l) absolute or relative path to a symbolic link */
+
