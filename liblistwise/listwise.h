@@ -1,22 +1,5 @@
-#ifndef _LIST_H
-#define _LIST_H
-
-/*
-
-SELECTION OPERATORS
-	m//  - select items matching the regex
-  
-  
-GENERAL OPERATORS
-	s/// - regex substition
-	e/   - delete selected
-	eo/  - delete other
-
-*/
-
-///
-/// [[ structures ]]
-///
+#ifndef _LISTWISE_H
+#define _LISTWISE_H
 
 /// list-stack
 //
@@ -50,118 +33,34 @@ typedef struct lstack
 	} sel;
 } lstack;
 
-/// generator declaration - definition is private
-struct generator_t;
-typedef struct generator_t generator;
-
-/// generator parser declaration
-typedef void generator_parser;
-
-/// variable_binder
+/// listwise_exec
 //
-// invoked during lstack_exec to resolve variable bindings
+// SUMMARY
+//  execute the listwise generator, receive an lstack result
 //
-// parameters
-//  v - variable name
-//  r - receives list
-//  l - receives list length
+// PARAMETERS
+//  s      - generator string
+//  l      - s length, or 0 for strlen
+//  init   - items to write to the stack before executing
+//  initls - lengths for items in init, 0 for strlen
+//  initl  - number of items in init
+//  r      - receives results
 //
-// returns 1 if the variable has a binding
+// RETURNS
+//  1 for success
 //
-typedef int (*variable_binder)(char* v, char*** r, int* rl);
-
-///
-/// [[ GENERATOR API ]]
-///
-
-/// generator_mkparser
-//
-// returns a generator parser
-//
-int generator_mkparser(generator_parser** p);
-
-/// generator_parse
-//
-// parse a generator string
-//
-// parameters
-//
-//   p  - parser returned from mkparser, or 
-//   s  - generator string
-//   l  - length of generator string, or 0 for strlen
-//   r  - receives parsed generator
-//
-// returns zero on failure
-//
-int generator_parse(generator_parser* p, char* s, int l, generator** r);
-
-/// generator_freeparser 
-//
-// frees a generator parser returned from mkparser
-//
-void generator_parser_free(generator_parser*);
-void generator_parser_xfree(generator_parser**);
-
-/// generator_dump
-//
-// print a generator to stdout
-//
-void generator_dump(generator*);
-
-/// generator_free
-//
-// frees a generator returned from parse
-//
-void generator_free(generator*);
-void generator_xfree(generator**);
-
-///
-/// [[ LSTACK API ]]
-///
-
-/// lstack_exec
-//
-// if *r == 0, create it as the empty list stack
-//
-// then, executes the generator against *r
-//
-// parameters
-//  g   - generator
-//  c   - callout
-//  r   - input/output list stack
-//
-int lstack_exec(generator* g, variable_binder c, lstack** r);
-
-/// lstack_dump
-//
-// print a list-stack to stdout
-//
-void lstack_dump(lstack*);
-
-/// lstack_reset
-//
-// reset (but do not deallocate) a list stack
-//
-// no-op with zero-valued parameter
-//
-void lstack_reset(lstack*);
+int listwise_exec(char* s, int l, char** init, int* initls, int initl, lstack** r);
 
 /// lstack_free
 //
 // free lstack with free-like semantics
 //
 void lstack_free(lstack*);
+
+/// lstack_xfree
+//
+// free an lstack with xfree-like semantics
+//
 void lstack_xfree(lstack**);
-
-///
-/// [[ LIST API ]]
-///
-
-///
-//
-// when an api fails, before returning zero, it prints an error to this file descriptor
-// which defaults to stderr
-//
-extern int list_err_fd;
 
 #endif

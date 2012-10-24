@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "listwise_internal.h"
+#include "listwise/internal.h"
 
 #include "generator.tab.h"
 
@@ -86,11 +86,24 @@ static int ensure(lstack * const restrict ls, int x, int y, int z)
 	return 1;
 }
 
+static int writestack(lstack* const restrict ls, int x, int y, const char* const restrict s, int l)
+{
+	// ensure stack has enough lists, list has enough strings, string has enough bytes
+	fatal(ensure, ls, x, y, l + 1);
+
+	// write and cap the string
+	memcpy(ls->s[x].s[y].s, s, l);
+	ls->s[x].s[y].s[l] = 0;
+	ls->s[x].s[y].l = l;
+
+	return 1;
+}
+
 //
 // API
 //
 
-int API lstack_exec(generator* g, variable_binder b, lstack** ls)
+int API lstack_exec(generator* g, char** init, int* initls, int initl, lstack** ls)
 {
 	// ovec workspace
 	int* ovec = 0;
@@ -100,21 +113,26 @@ int API lstack_exec(generator* g, variable_binder b, lstack** ls)
 	if(!*ls)
 		fatal(xmalloc, ls, sizeof(*ls[0]));
 
-	// construct top list from initial args
+	// write init elements to top of list stack
 	int x;
+	for(x = 0; x < initl; x++)
+	{
+		fatal(writestack, *ls, 0, x, init[x], initls[x]);
+	}
+
+	// write initial generator args at top of list stack
 	for(x = 0; x < g->argsl; x++)
 	{
-		fatal(lstack_write, *ls, 0, x, g->args[x]->s, g->args[x]->l);
+		fatal(writestack, *ls, 0, x + initl, g->args[x]->s, g->args[x]->l);
 	}
 
 	// execute all operators
 	for(x = 0; x < g->opsl; x++)
 	{
-		fatal(g->ops[x]->op->op_exec, g->ops[x], *ls, b, &ovec, &ovec_len);
+		fatal(g->ops[x]->op->op_exec, g->ops[x], *ls, &ovec, &ovec_len);
 	}
 
 	free(ovec);
-
 	return 1;
 }
 
@@ -222,15 +240,7 @@ int API lstack_appendf(lstack* const restrict ls, int x, int y, const char* cons
 
 int API lstack_write(lstack* const restrict ls, int x, int y, const char* const restrict s, int l)
 {
-	// ensure stack has enough lists, list has enough strings, string has enough bytes
-	fatal(ensure, ls, x, y, l + 1);
-
-	// write and cap the string
-	memcpy(ls->s[x].s[y].s, s, l);
-	ls->s[x].s[y].s[l] = 0;
-	ls->s[x].s[y].l = l;
-
-	return 1;
+	return writestack(ls, x, y, s, l);
 }
 
 int API lstack_writef(lstack* const restrict ls, int x, int y, const char* const restrict fmt, ...)

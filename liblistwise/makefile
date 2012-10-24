@@ -41,7 +41,7 @@ SOURCES					+=generator/generator.tab.c
 #  C/L FLAGS - user specified compiler flags
 # 
 COPTS						+=-m64 -O0 -g3 -Werror -D_GNU_SOURCE -fPIC -I${SRCDIR} -I${SRCDIR}/common -I${SRCDIR}/re -I${SRCDIR}/generator
-LOPTS            =-lpcre -ldl -Wl,--version-script=exports -shared -Wl,-soname,${LIB}
+LOPTS            =-lpcre -ldl -shared -Wl,--version-script=exports -Wl,-soname,${LIB}
 
 %.o : COPTS     +=-c
 
@@ -99,11 +99,16 @@ op.o : common/xmem.o
 .PHONY: install uninstall clean
 
 install: ${LIB} ${OPLIST}
-	${INSTALL} -d               ${DESTDIR}/${LIBDIR}
-	${INSTALL_PROGRAM} ${LIB}   ${DESTDIR}/${LIBDIR}/${LIB}.${VER}
-	ln -fs ${LIB}.${VER}        ${DESTDIR}/${LIBDIR}/${LIB}
-	${INSTALL} -d               ${DESTDIR}/${INCDIR}
-	${INSTALL} listwise.h       ${DESTDIR}/${INCDIR}/listwise.h
+	${INSTALL} -d                      ${DESTDIR}/${LIBDIR}
+	${INSTALL_PROGRAM} ${LIB}          ${DESTDIR}/${LIBDIR}/${LIB}.${VER}
+	ln -fs ${LIB}.${VER}               ${DESTDIR}/${LIBDIR}/${LIB}
+	${INSTALL} -d                      ${DESTDIR}/${INCDIR}
+	${INSTALL} -d                      ${DESTDIR}/${INCDIR}/listwise
+	${INSTALL} listwise.h              ${DESTDIR}/${INCDIR}/listwise.h
+	${INSTALL} listwise/operator.h     ${DESTDIR}/${INCDIR}/listwise/operator.h
+	${INSTALL} listwise/generator.h    ${DESTDIR}/${INCDIR}/listwise/generator.h
+	${INSTALL} listwise/ops.h          ${DESTDIR}/${INCDIR}/listwise/ops.h
+	${INSTALL} listwise/lstack.h       ${DESTDIR}/${INCDIR}/listwise/lstack.h
 	
 	${INSTALL} -d               ${DESTDIR}/${LIBDIR}/listwise
 	for x in ${OPLIST}; do \

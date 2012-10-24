@@ -3,7 +3,7 @@
 
 #include <pcre.h>
 
-#include "listwise_internal.h"
+#include "listwise/internal.h"
 #include "re.h"
 
 #include "xmem.h"

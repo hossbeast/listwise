@@ -5,7 +5,7 @@
 #include <string.h>
 #include <dirent.h>
 
-#include <listwise_op.h>
+#include <listwise/operator.h>
 
 #include "control.h"
 
@@ -25,7 +25,7 @@ OPERATION
 */
 
 static int op_validate(operation* o);
-static int op_exec(operation*, lstack*, variable_binder, int**, int*);
+static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
 	  .type					= OPTYPE_GENERAL
@@ -39,7 +39,7 @@ int op_validate(operation* o)
 	return 1;
 }
 
-int op_exec(operation* o, lstack* ls, variable_binder b, int** ovec, int* ovec_len)
+int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
 	int l = ls->s[0].l;
 	if(ls->sel.l)

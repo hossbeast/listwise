@@ -4,14 +4,14 @@
 
 #include <pcre.h>
 
-#include "listwise_internal.h"
+#include "listwise/internal.h"
 #include "re.h"
 
 #include "xmem.h"
 
-operator**	g_ops;
-int					g_ops_a;
-int					g_ops_l;
+operator **	APIDATA g_ops;
+int									g_ops_a;
+int					APIDATA g_ops_l;
 
 int op_load(char* path)
 {

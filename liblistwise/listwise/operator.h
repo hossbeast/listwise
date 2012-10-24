@@ -1,17 +1,20 @@
-#ifndef _LISTWISE_OP_H
-#define _LISTWISE_OP_H
+#ifndef _LISTWISE_OPERATOR_H
+#define _LISTWISE_OPERATOR_H
 
 #include <stdint.h>
 #include <stdio.h>
 
-#include <listwise.h>
 #include <pcre.h>
+
+#include <listwise.h>
 
 #define restrict __restrict
 
-///
-/// [[ OPERATOR API ]]
-///
+/*
+** LISTWISE OPERATOR API
+**
+*/
+
 struct operation;
 struct operator;
 struct arg;
@@ -32,11 +35,11 @@ typedef struct operator
 {
 	void *	handle;		// dlopen handle
 	int			type;			// OPTYPE_*
-	char*		desc;
+	char*		desc;			// operator descriptions
 
 	// methods
 	int 		(*op_validate)(struct operation*);
-	int 		(*op_exec)(struct operation*, lstack*, variable_binder, int**, int*);
+	int 		(*op_exec)(struct operation*, lstack*, int**, int*);
 
 	char		s[6];			// name; overwritten by liblist during initialization
 	int			sl;				// name length

@@ -5,9 +5,10 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include "listwise_internal.h"
+#include "listwise/internal.h"
 
 #include "xmem.h"
+#include "control.h"
 
 /// initialize
 //
@@ -64,6 +65,5 @@ void __attribute__((constructor)) list_initialize()
 
 void __attribute__((destructor)) list_teardown()
 {
-	extern void op_teardown();
 	op_teardown();
 }
