@@ -1,14 +1,4 @@
-#include <stdlib.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <string.h>
-#include <dirent.h>
-
 #include <listwise/operator.h>
-
-#include "control.h"
-
-#include "parseint.h"
 
 /*
 
@@ -51,8 +41,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		{
 			int a = ls->sel.s[x];
 			int b = ls->sel.s[ls->sel.l - 1 - x];
-
-printf("SWAP %d <-> %d\n", a, b);
 
 			typeof(ls->s[0].s[0]) t = ls->s[0].s[a];
 			ls->s[0].s[a] = ls->s[0].s[b];

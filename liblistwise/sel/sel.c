@@ -3,6 +3,7 @@
 #include "listwise/internal.h"
 
 #include "xmem.h"
+#include "control.h"
 
 int API lstack_sel_clear(lstack* const restrict ls)
 {

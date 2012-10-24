@@ -1,14 +1,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
-#include <errno.h>
 #include <string.h>
-#include <dirent.h>
 
 #include <listwise/operator.h>
-
-#include "control.h"
-
-#include "parseint.h"
 
 /*
 

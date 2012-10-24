@@ -8,6 +8,7 @@
 #include "re.h"
 
 #include "xmem.h"
+#include "control.h"
 
 operator **	APIDATA g_ops;
 int									g_ops_a;

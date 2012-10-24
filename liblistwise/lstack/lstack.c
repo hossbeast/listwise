@@ -10,6 +10,7 @@
 #include "xmem.h"
 #include "xstring.h"
 #include "macros.h"
+#include "control.h"
 
 //
 // static

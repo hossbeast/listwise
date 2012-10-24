@@ -9,49 +9,13 @@
 #include <listwise/generator.h>
 #include <listwise/lstack.h>
 
+#include "args.h"
+
 #define FAIL(x, ...) { printf(x, ##__VA_ARGS__); return 1; }
-
-struct
-{
-	char		dump;				// -d
-	char		number;			// -n
-	char		in_null;		// -0
-	char		out_null;		// -z
-} args;
-
-static void usage()
-{
-	printf(
-		"listwise : list-centric computation utility\n"
-		"\n"
-		"Usage : lw [options]\n"
-		"  --help|-h for this message\n"
-		"\n"
-		"------------------[options]----------------------------------------\n"
-		"\n"
-		" -d    dump list-stack at each step during execution\n"
-		" -n    number output items\n"
-		" -z    separate output items with null byte instead of newline\n"
-		" -0    read input items separated by null byte instead of newline\n"
-		"\n"
-		"------------------[operators]--------------------------------------\n"
-		"\n"
-	);
-
-	int x;
-	for(x = 0; x < g_ops_l; x++)
-	{
-		printf("%s\n", g_ops[x]->desc);
-	}
-
-	printf(
-		"\n"
-	);
-}
 
 int main(int argc, char** argv)
 {
-	int x;
+	int x = parse_args(argc, argv);
 
 	// generator parser
 	generator_parser* p = 0;
@@ -68,12 +32,12 @@ int main(int argc, char** argv)
 	if(generator_mkparser(&p) == 0)
 		FAIL("mkparser failed\n");
 
-	if(argc > 1)
+	if(x < argc)
 	{
-		if(generator_parse(p, argv[1], 0, &g) == 0)
+		if(generator_parse(p, argv[x], 0, &g) == 0)
 			FAIL("parse failed\n");
 
-		if(args.dump)
+		if(g_args.dump)
 		{
 			printf("GENERATOR: \n");
 			generator_dump(g);
@@ -92,7 +56,7 @@ int main(int argc, char** argv)
 		// execute operators
 		for(x = 0; x < g->opsl; x++)
 		{
-			if(args.dump)
+			if(g_args.dump)
 			{
 				printf(" >> %s", g->ops[x]->op->s);
 
@@ -106,7 +70,7 @@ int main(int argc, char** argv)
 			if(g->ops[x]->op->op_exec(g->ops[x], ls, &ovec, &ovec_len) == 0)
 				FAIL("operator exec failed\n");
 
-			if(args.dump)
+			if(g_args.dump)
 			{
 				lstack_dump(ls);
 			}
@@ -118,12 +82,12 @@ int main(int argc, char** argv)
 		{
 			for(x = 0; x < ls->sel.l; x++)
 			{
-				if(args.number)
+				if(g_args.number)
 					printf("%3d %.*s", x, ls->s[0].s[ls->sel.s[x]].l, ls->s[0].s[ls->sel.s[x]].s);
 				else
 					printf("%.*s", ls->s[0].s[ls->sel.s[x]].l, ls->s[0].s[ls->sel.s[x]].s);
 
-				if(args.out_null)
+				if(g_args.out_null)
 					printf("%hhu", 0);
 				else
 					printf("\n");
@@ -133,12 +97,12 @@ int main(int argc, char** argv)
 		{
 			for(x = 0; x < ls->s[0].l; x++)
 			{
-				if(args.number)
+				if(g_args.number)
 					printf("%3d %.*s", x, ls->s[0].s[x].l, ls->s[0].s[x].s);
 				else
 					printf("%.*s", ls->s[0].s[x].l, ls->s[0].s[x].s);
 
-				if(args.out_null)
+				if(g_args.out_null)
 					printf("%hhu", 0);
 				else
 					printf("\n");

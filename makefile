@@ -16,7 +16,7 @@ export
 #
 # required objects
 #
-SOURCES          =main.c
+SOURCES          =main.c args.c
 
 #
 # compiler flags
@@ -44,6 +44,7 @@ ${NAME}: ${SOURCES:.c=.o}
 install: ${NAME}
 	${INSTALL} -d               ${DESTDIR}/${BINDIR}
 	${INSTALL_PROGRAM} ${NAME}  ${DESTDIR}/${BINDIR}/${NAME}
+	ln -vfs listwise /usr/local/bin/lw
 
 uninstall:
 	rm -f												${DESTDIR}/${BINDIR}/${NAME}
