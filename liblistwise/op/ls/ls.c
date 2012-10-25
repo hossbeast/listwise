@@ -46,66 +46,68 @@ int op_validate(operation* o)
 	return 1;
 }
 
-int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
+static int listing(lstack* ls, char * s)
 {
-	int l = 0;
+	DIR * dd = 0;
 
-	if(o->argsl)
-		l = o->argsl;
-	else if(ls->sel.l)
-		l = ls->sel.l;
-	else
-		l = ls->s[0].l;
-
-	if(l)
+	if((dd = opendir(s)))
 	{
-		fatal(lstack_push, ls);
-
-		int x;
-		int y = 0;
-		for(x = 0; x < l; x++)
+		struct dirent ent;
+		struct dirent * entp = 0;
+		int r = 0;
+		while(1)
 		{
-			char * s = 0;
-
-			if(o->argsl)
-				s = o->args[x]->s;
-			else if(ls->sel.l)
-				s = ls->s[1].s[ls->sel.s[x]].s;
-			else
-				s = ls->s[1].s[x].s;
-
-			DIR * dd = 0;
-
-			if((dd = opendir(s)))
+			if((r = readdir_r(dd, &ent, &entp)) == 0)
 			{
-				struct dirent ent;
-				struct dirent * entp = 0;
-				int r = 0;
-				while(1)
+				if(entp)
 				{
-					if((r = readdir_r(dd, &ent, &entp)) == 0)
-					{
-						if(entp)
-						{
-							fatal(lstack_writef, ls, 0, y++, "%s/%s", s, entp->d_name);
-						}
-						else
-						{
-							break;
-						}
-					}
-					else
-					{
-						fail("readdir('%s')=[%d][%s]", s, r, strerror(r));
-					}
+					fatal(lstack_addf, ls, "%s/%s", s, entp->d_name);
+				}
+				else
+				{
+					break;
 				}
 			}
 			else
 			{
-				fail("opendir('%s')=[%d][%s]", s, errno, strerror(errno));
+				fail("readdir('%s')=[%d][%s]", s, r, strerror(r));
+			}
+		}
+	}
+	else
+	{
+		fail("opendir('%s')=[%d][%s]", s, errno, strerror(errno));
+	}
+
+	closedir(dd);
+	return 1;
+}
+
+int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
+{
+	int x;
+	fatal(lstack_push, ls);
+
+	if(o->argsl)
+	{
+		for(x = 0; x < o->argsl; x++)
+			fatal(listing, ls, o->args[x]->s);
+	}
+	else
+	{
+		for(x = 0; x < ls->s[1].l; x++)
+		{
+			int go = 1;
+			if(ls->sel.l)
+			{
+				if(ls->sel.sl <= (x/8))
+					break;
+
+				go = (ls->sel.s[x/8] & (0x01 << (x%8)));
 			}
 
-			closedir(dd);
+			if(go)
+				fatal(listing, ls, ls->s[1].s[x].s);
 		}
 	}
 

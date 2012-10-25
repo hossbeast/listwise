@@ -15,7 +15,7 @@
 
 #include "args.h"
 
-#define FAIL(x, ...) { printf(x, ##__VA_ARGS__); return 1; }
+#define FAIL(x, ...) { printf(x "\n", ##__VA_ARGS__); return 1; }
 
 int main(int argc, char** argv)
 {
@@ -34,12 +34,12 @@ int main(int argc, char** argv)
 	int ovec_len = 0;
 
 	if(generator_mkparser(&p) == 0)
-		FAIL("mkparser failed\n");
+		FAIL("mkparser failed");
 
 	if(x < argc)
 	{
 		if(generator_parse(p, argv[x], 0, &g) == 0)
-			FAIL("parse failed\n");
+			FAIL("parse failed");
 
 		if(g_args.dump)
 		{
@@ -48,12 +48,12 @@ int main(int argc, char** argv)
 		}
 
 		if((ls = calloc(1, sizeof(*ls))) == 0)
-			FAIL("calloc failed\n");
+			FAIL("calloc failed");
 
 		// read from stdin if possible
 		struct stat st;
 		if(fstat(0, &st) == -1)
-			FAIL("fstat(0) failed\n");
+			FAIL("fstat(0) failed");
 
 		if(S_ISREG(st.st_mode) || S_ISFIFO(st.st_mode))
 		{
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 				if(s[1] - s[0])
 				{
 					if(lstack_add(ls, s[0], s[1] - s[0]) == 0)
-						FAIL("lstack_add failed\n");
+						FAIL("lstack_add failed");
 				}
 				s[0] = s[1] + 1;
 			}
@@ -91,16 +91,12 @@ int main(int argc, char** argv)
 			if(S_ISREG(st.st_mode))
 				munmap(mem, st.st_size);
 		}
-		else
-		{
-			FAIL("fstat[0] !< { S_ISREG, S_ISFIFO }");
-		}
 
 		// write init elements to top of list stack
 		for(x = 0; x < g->argsl; x++)
 		{
 			if(lstack_add(ls, g->args[x]->s, g->args[x]->l) == 0)
-				FAIL("lstack_add failed\n");
+				FAIL("lstack_add failed");
 		}
 
 		if(g_args.dump)
@@ -121,7 +117,7 @@ int main(int argc, char** argv)
 			}
 
 			if(g->ops[x]->op->op_exec(g->ops[x], ls, &ovec, &ovec_len) == 0)
-				FAIL("operator exec failed\n");
+				FAIL("operator exec failed");
 
 			if(g_args.dump)
 				lstack_dump(ls);
@@ -129,24 +125,18 @@ int main(int argc, char** argv)
 
 		// OUTPUT
 
-		if(ls->sel.l)
+		for(x = 0; x < ls->s[0].l; x++)
 		{
-			for(x = 0; x < ls->sel.l; x++)
+			int go = 1;
+			if(ls->sel.l)
 			{
-				if(g_args.number)
-					printf("%3d %.*s", x, ls->s[0].s[ls->sel.s[x]].l, ls->s[0].s[ls->sel.s[x]].s);
-				else
-					printf("%.*s", ls->s[0].s[ls->sel.s[x]].l, ls->s[0].s[ls->sel.s[x]].s);
+				if(ls->sel.sl <= (x/8))
+					break;
 
-				if(g_args.out_null)
-					printf("%hhu", 0);
-				else
-					printf("\n");
+				go = (ls->sel.s[x/8] & (0x01 << (x%8)));
 			}
-		}
-		else if(ls->l)
-		{
-			for(x = 0; x < ls->s[0].l; x++)
+
+			if(go)
 			{
 				if(g_args.number)
 					printf("%3d %.*s", x, ls->s[0].s[x].l, ls->s[0].s[x].s);

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <alloca.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <string.h>
@@ -8,20 +9,15 @@
 
 #include "control.h"
 
-#include "parseint.h"
-
 /*
 
-u operator - select stringwise-unique entries (expects an already-sorted list)
+z operator - select none
 
 NO ARGUMENTS
 
- use current selection, ELSE
- use entire top list
-
 OPERATION
 
- 1. select entries which are unique
+ 1. clear selection
 
 */
 
@@ -32,7 +28,7 @@ operator op_desc = {
 	  .type					= OPTYPE_GENERAL
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	ss - "
+	, .desc					= "	z - "
 };
 
 int op_validate(operation* o)
@@ -42,22 +38,5 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	int l = 0;
-
-	if(ls->sel.l)
-	{
-	}
-	else
-	{
-		int x;
-		for(x = 0; x < ls->s[0].l; x++)
-		{
-			if(x == 0 || strcmp(ls->s[0].s[x-1].s, ls->s[0].s[x].s))
-			{
-				fatal(lstack_sel_set, ls, x);
-			}
-		}
-	}
-
-	return 1;
+	lstack_sel_clear(ls);
 }

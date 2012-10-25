@@ -48,10 +48,11 @@ ${NAME}: ${SOURCES:.c=.o}
 install: ${NAME}
 	${INSTALL} -d               ${DESTDIR}/${BINDIR}
 	${INSTALL_PROGRAM} ${NAME}  ${DESTDIR}/${BINDIR}/${NAME}
-	ln -vfs listwise /usr/local/bin/lw
+	ln -vfs listwise 						${DESTDIR}/${BINDIR}/lw
 
 uninstall:
 	rm -f												${DESTDIR}/${BINDIR}/${NAME}
+	rm -f												${DESTDIR}/${BINDIR}/lw
 
 clean ::
-	rm -f *.o ${NAME}
+	rm -f *.o ${NAME} lw

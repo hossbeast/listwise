@@ -148,14 +148,14 @@ int lstack_writef(lstack* const restrict ls, int x, int y, const char* const res
 
 /// lstack_add
 //
-// write text to the lowest-numbered entry of list 0
+// write text to the next unused entry of list 0
 //
 int lstack_add(lstack* const restrict ls, const char* const restrict s, int l)
 	__attribute__((nonnull));
 
 /// lstack_addf
 //
-// write text to the lowest-numbered entry of list 0 using printf-style args
+// write text to the next unused entry of list 0 using printf-style args
 //
 int lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
 	__attribute__((nonnull));
@@ -195,22 +195,23 @@ int lstack_xchg(lstack* const restrict ls)
 int lstack_sel_clear(lstack* const restrict ls)
 	__attribute__((nonnull));
 
-/// sel_write
+/// sel_set
 //
 // select the entry at 0:y
 //
-// maintains the selection as a sorted, unique list
-//
-int lstack_sel_add(lstack* const restrict ls, int y)
+int lstack_sel_set(lstack* const restrict ls, int y)
 	__attribute__((nonnull));
 
 /// sel_write
 //
-// selec the entry at 0:y
+// select exactly those entries specified in news
 //
-// sorted/uniqueness checks bypassed
+// PARAMETERS
+//  ls    - list-stack
+//  news  - bitvector specifying the selection
+//  newsl - elements in news
 //
-int lstack_sel_write(lstack* const restrict ls, int y)
+int lstack_sel_write(lstack* const restrict ls, uint8_t * news, int newsl)
 	__attribute__((nonnull));
 
 /// re_compile

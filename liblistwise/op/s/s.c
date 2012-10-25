@@ -78,136 +78,140 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	int l = ls->s[0].l;
-	if(ls->sel.l)
-		l = ls->sel.l;
-
 	int isglobal = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'g');
 
 	int x;
-	for(x = 0; x < l; x++)
+	for(x = 0; x < ls->s[0].l; x++)
 	{
-		int k = x;
+		int go = 1;
 		if(ls->sel.l)
-			k = ls->sel.s[x];
-
-		// ls->s[0].s[k].s - the string to check and modify
-		fatal(re_exec, &o->args[0]->re, ls->s[0].s[k].s, ls->s[0].s[k].l, 0, ovec, ovec_len);
-
-		if((*ovec)[0] > 0)
 		{
-			// copy of the starting string
-			int ssl = ls->s[0].s[k].l;
-			char * ss = alloca(ssl + 1);
-			memcpy(ss, ls->s[0].s[k].s, ssl);
-			ss[ssl] = 0;
+			if(ls->sel.sl <= (x/8))
+				break;
 
-			// offset to the end of the last match
-			int loff = 0;
+			go = (ls->sel.s[x/8] & (0x01 << (x%8)));
+		}
 
-			// clear this string on the stack
-			lstack_clear(ls, 0, k);
+		if(go)
+		{
+			// ls->s[0].s[x].s - the string to check and modify
+			fatal(re_exec, &o->args[0]->re, ls->s[0].s[x].s, ls->s[0].s[x].l, 0, ovec, ovec_len);
 
-			// text in the subject string before the first match
-			fatal(lstack_append
-				, ls
-				, 0
-				, k
-				, ss
-				, (*ovec)[1]
-			);
-
-			do
+			if((*ovec)[0] > 0)
 			{
-				// text in the subject string following the previous match, if any, and preceeding the current match
-				if(loff)
-				{
-					fatal(lstack_append
-						, ls
-						, 0
-						, k
-						, ss + loff
-						, (*ovec)[1] - loff
-					);
-				}
+				// copy of the starting string
+				int ssl = ls->s[0].s[x].l;
+				char * ss = alloca(ssl + 1);
+				memcpy(ss, ls->s[0].s[x].s, ssl);
+				ss[ssl] = 0;
 
-				// text in the replacement string before the first backreference
-				if(o->args[1]->refsl)
-				{
-					fatal(lstack_append
-						, ls
-						, 0
-						, k
-						, o->args[1]->s
-						, o->args[1]->refs[0].s - o->args[1]->s
-					);
-				}
-				else
-				{
-					fatal(lstack_append
-						, ls
-						, 0
-						, k
-						, o->args[1]->s
-						, o->args[1]->l
-					);
-				}
+				// offset to the end of the last match
+				int loff = 0;
 
-				// foreach backreference
-				int i;
-				for(i = 0; i < o->args[1]->refsl; i++)
+				// clear this string on the stack
+				lstack_clear(ls, 0, x);
+
+				// text in the subject string before the first match
+				fatal(lstack_append
+					, ls
+					, 0
+					, x
+					, ss
+					, (*ovec)[1]
+				);
+
+				do
 				{
-					// text in the replacement string between this and the previous backreference
-					if(i)
+					// text in the subject string following the previous match, if any, and preceeding the current match
+					if(loff)
 					{
 						fatal(lstack_append
 							, ls
 							, 0
-							, k
-							, o->args[1]->refs[i-1].e
-							, o->args[1]->refs[i].s - o->args[1]->refs[i-1].e
+							, x
+							, ss + loff
+							, (*ovec)[1] - loff
 						);
 					}
 
-					// text of the backreference itself, if the corresponding subcapture was populated
-					if((*ovec)[0] > o->args[1]->refs[i].bref)
+					// text in the replacement string before the first backreference
+					if(o->args[1]->refsl)
 					{
-						int a = (*ovec)[1 + (o->args[1]->refs[i].bref * 2) + 0];
-						int b = (*ovec)[1 + (o->args[1]->refs[i].bref * 2) + 1];
-
-						if(a >= 0 && b >= 0)
-							fatal(lstack_append, ls, 0, k, ss + a, b - a);
+						fatal(lstack_append
+							, ls
+							, 0
+							, x
+							, o->args[1]->s
+							, o->args[1]->refs[0].s - o->args[1]->s
+						);
 					}
-				}
+					else
+					{
+						fatal(lstack_append
+							, ls
+							, 0
+							, x
+							, o->args[1]->s
+							, o->args[1]->l
+						);
+					}
 
-				// text in the replacement string following the last backreference
-				if(o->args[1]->refsl)
-				{
-					fatal(lstack_append
-						, ls
-						, 0
-						, k
-						, o->args[1]->ref_last->e
-						, o->args[1]->l - (o->args[1]->ref_last->e - o->args[1]->s) 
-					);
-				}
+					// foreach backreference
+					int i;
+					for(i = 0; i < o->args[1]->refsl; i++)
+					{
+						// text in the replacement string between this and the previous backreference
+						if(i)
+						{
+							fatal(lstack_append
+								, ls
+								, 0
+								, x
+								, o->args[1]->refs[i-1].e
+								, o->args[1]->refs[i].s - o->args[1]->refs[i-1].e
+							);
+						}
 
-				loff = (*ovec)[2];
+						// text of the backreference itself, if the corresponding subcapture was populated
+						if((*ovec)[0] > o->args[1]->refs[i].bref)
+						{
+							int a = (*ovec)[1 + (o->args[1]->refs[i].bref * 2) + 0];
+							int b = (*ovec)[1 + (o->args[1]->refs[i].bref * 2) + 1];
 
-				if(isglobal)
-				{
-					fatal(re_exec, &o->args[0]->re, ss, ssl, loff, ovec, ovec_len);
-				}
-			} while(isglobal && (*ovec)[0] > 0);
+							if(a >= 0 && b >= 0)
+								fatal(lstack_append, ls, 0, x, ss + a, b - a);
+						}
+					}
 
-			// text in the subject string following the last match
-			fatal(lstack_append
-				, ls
-				, 0
-				, k
-				, ss + loff
-				, ssl - loff
-			);
+					// text in the replacement string following the last backreference
+					if(o->args[1]->refsl)
+					{
+						fatal(lstack_append
+							, ls
+							, 0
+							, x
+							, o->args[1]->ref_last->e
+							, o->args[1]->l - (o->args[1]->ref_last->e - o->args[1]->s) 
+						);
+					}
+
+					loff = (*ovec)[2];
+
+					if(isglobal)
+					{
+						fatal(re_exec, &o->args[0]->re, ss, ssl, loff, ovec, ovec_len);
+					}
+				} while(isglobal && (*ovec)[0] > 0);
+
+				// text in the subject string following the last match
+				fatal(lstack_append
+					, ls
+					, 0
+					, x
+					, ss + loff
+					, ssl - loff
+				);
+			}
 		}
 	}
 

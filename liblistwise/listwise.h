@@ -1,6 +1,8 @@
 #ifndef _LISTWISE_H
 #define _LISTWISE_H
 
+#include <stdint.h>
+
 /// list-stack
 //
 // stack of lists of strings
@@ -27,9 +29,11 @@ typedef struct lstack
 
 	struct 	// selection
 	{
-		int		l;
-		int		a;
-		int *	s;
+		uint8_t *	s;	// bitvector of selected positions
+		int				l;	// number of selected items
+
+		int				sl;	// length of s
+		int				sa;	// allocated size of s
 	} sel;
 } lstack;
 

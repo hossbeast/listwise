@@ -41,32 +41,36 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	int l = ls->s[0].l;
-	if(ls->sel.l)
-		l = ls->sel.l;
+	char ss[256];
 
 	int x;
-	for(x = 0; x < l; x++)
+	for(x = 0; x < ls->s[0].l; x++)
 	{
-		int k = x;
+		int go = 1;
 		if(ls->sel.l)
-			k = ls->sel.s[x];
-
-		char * ss = alloca(256);
-
-		if(realpath(ls->s[0].s[k].s, ss))
 		{
-			fatal(lstack_write
-				, ls
-				, 0
-				, k
-				, ss
-				, strlen(ss)
-			);
+			if(ls->sel.sl <= (x/8))	// could not be selected
+				break;
+
+			go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
 		}
-		else
+
+		if(go)
 		{
-			printf("[%d][%s]\n", errno, strerror(errno));
+			if(realpath(ls->s[0].s[x].s, ss))
+			{
+				fatal(lstack_write
+					, ls
+					, 0
+					, x
+					, ss
+					, strlen(ss)
+				);
+			}
+			else
+			{
+				printf("[%d][%s]\n", errno, strerror(errno));
+			}
 		}
 	}
 

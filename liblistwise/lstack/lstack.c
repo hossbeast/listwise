@@ -186,7 +186,6 @@ void API lstack_dump(lstack* ls)
 {
 	int x;
 	int y;
-	int z = 0;
 	for(x = 0; x < ls->l; x++)
 	{
 		if(x)
@@ -197,8 +196,11 @@ void API lstack_dump(lstack* ls)
 			int sel = 0;
 			if(x == 0)
 			{
-				if(z < ls->sel.l && y == ls->sel.s[z])
-					sel++;
+				if(ls->sel.sl > (x/8))
+				{
+					if(ls->sel.s[y/8] & (0x01 << (y%8)))
+						sel++;
+				}
 			}
 
 			printf("[%4d,%4d]%s'%.*s'\n"
@@ -208,9 +210,6 @@ void API lstack_dump(lstack* ls)
 				, ls->s[x].s[y].l
 				, ls->s[x].s[y].s
 			);
-
-			if(sel)
-				z++;
 		}
 	}
 }
