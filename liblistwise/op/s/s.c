@@ -37,10 +37,16 @@ operator op_desc = {
 
 int op_validate(operation* o)
 {
-	if(o->argsl == 2)
-		fatal(re_compile, o->args[0]->s, &o->args[0]->re, 0);
-	else if(o->argsl == 3)
-		fatal(re_compile, o->args[0]->s, &o->args[0]->re, o->args[2]->s);
+	if(o->argsl == 2 || o->argsl == 3)
+	{
+		if(o->args[0]->l == 0)
+			fail("s -- empty first argument");
+
+		if(o->argsl == 2 || o->args[2]->l == 0)
+			fatal(re_compile, o->args[0]->s, &o->args[0]->re, 0);
+		else if(o->argsl == 3)
+			fatal(re_compile, o->args[0]->s, &o->args[0]->re, o->args[2]->s);
+	}
 	else
 		fail("s -- argsl: %d", o->argsl);
 
@@ -76,7 +82,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	if(ls->sel.l)
 		l = ls->sel.l;
 
-	int isglobal = o->argsl == 3 && strchr(o->args[2]->s, 'g');
+	int isglobal = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'g');
 
 	int x;
 	for(x = 0; x < l; x++)

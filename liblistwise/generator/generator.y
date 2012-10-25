@@ -130,6 +130,12 @@ items
 		$$->op = $1;
 	}
 	| string
+	|
+	{
+		$$ = calloc(1, sizeof(*$$));
+		$$->t = 2;
+		$$->arg = calloc(1, sizeof(*$$->arg));
+	}
 	;
 
 string

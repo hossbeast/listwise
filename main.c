@@ -103,6 +103,9 @@ int main(int argc, char** argv)
 				FAIL("lstack_add failed\n");
 		}
 
+		if(g_args.dump)
+			lstack_dump(ls);
+
 		// execute operators
 		for(x = 0; x < g->opsl; x++)
 		{
@@ -121,9 +124,7 @@ int main(int argc, char** argv)
 				FAIL("operator exec failed\n");
 
 			if(g_args.dump)
-			{
 				lstack_dump(ls);
-			}
 		}
 
 		// OUTPUT
