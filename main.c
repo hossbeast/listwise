@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
@@ -46,11 +50,57 @@ int main(int argc, char** argv)
 		if((ls = calloc(1, sizeof(*ls))) == 0)
 			FAIL("calloc failed\n");
 
+		// read from stdin if possible
+		struct stat st;
+		if(fstat(0, &st) == -1)
+			FAIL("fstat(0) failed\n");
+
+		if(S_ISREG(st.st_mode) || S_ISFIFO(st.st_mode))
+		{
+			void * mem = 0;
+			size_t sz = 0;
+			if(S_ISREG(st.st_mode))
+			{
+				sz = st.st_size;
+				if((mem = mmap(0, sz, PROT_READ, MAP_PRIVATE, 0, 0)) == MAP_FAILED)
+					FAIL("mmap(0) failed");
+			}
+			else if(S_ISFIFO(st.st_mode))
+			{
+				char blk[512];
+				int r = 0;
+				while((r = read(0, blk, sizeof(blk) / sizeof(blk[0]))) > 0)
+				{
+					mem = realloc(mem, sz + r);
+					memcpy(((char*)mem) + sz, blk, r);
+					sz += r;
+				}
+			}
+
+			char * s[2] = { mem, 0 };
+			while((s[1] = memchr(s[0], '\n', sz - (s[0] - ((char*)mem)))))
+			{
+				if(s[1] - s[0])
+				{
+					if(lstack_add(ls, s[0], s[1] - s[0]) == 0)
+						FAIL("lstack_add failed\n");
+				}
+				s[0] = s[1] + 1;
+			}
+
+			if(S_ISREG(st.st_mode))
+				munmap(mem, st.st_size);
+		}
+		else
+		{
+			FAIL("fstat[0] !< { S_ISREG, S_ISFIFO }");
+		}
+
 		// write init elements to top of list stack
 		for(x = 0; x < g->argsl; x++)
 		{
-			if(lstack_write(ls, 0, x, g->args[x]->s, g->args[x]->l) == 0)
-				FAIL("lstack_write failed\n");
+			if(lstack_add(ls, g->args[x]->s, g->args[x]->l) == 0)
+				FAIL("lstack_add failed\n");
 		}
 
 		// execute operators

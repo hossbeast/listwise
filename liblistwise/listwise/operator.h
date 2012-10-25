@@ -146,6 +146,20 @@ int lstack_write(lstack* const restrict ls, int x, int y, const char* const rest
 int lstack_writef(lstack* const restrict ls, int x, int y, const char* const restrict s, ...)
 	__attribute__((nonnull));
 
+/// lstack_add
+//
+// write text to the lowest-numbered entry of list 0
+//
+int lstack_add(lstack* const restrict ls, const char* const restrict s, int l)
+	__attribute__((nonnull));
+
+/// lstack_addf
+//
+// write text to the lowest-numbered entry of list 0 using printf-style args
+//
+int lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
+	__attribute__((nonnull));
+
 /// lstack_push
 //
 // push an empty list onto the stack

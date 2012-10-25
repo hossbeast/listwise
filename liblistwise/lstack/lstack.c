@@ -265,6 +265,16 @@ int API lstack_writef(lstack* const restrict ls, int x, int y, const char* const
 	return 1;
 }
 
+int API lstack_add(lstack* const restrict ls, const char* const restrict s, int l)
+{
+	return writestack(ls, 0, ls->l ? ls->s[0].l : 0, s, l);
+}
+
+int API lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
+{
+	return 0;
+}
+
 int API lstack_push(lstack* const restrict ls)
 {
 	// ensure stack has enough lists

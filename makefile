@@ -34,6 +34,10 @@ LOPTS            =-llistwise
 # link the executable
 ${NAME}: ${SOURCES:.c=.o}
 	${CC} ${COPTS} ${CFLAGS} -o $@ *.o ${LOPTS} ${LFLAGS}
+	ln -vfs $@ lw
+
+%.o : %.c
+	$(CC) $(COPTS) $(CFLAGS) $< -o $@
 
 #
 # phony targets

@@ -21,6 +21,7 @@ sn      Sort Numeric (asc)
 filesystem operators
 ls      directory LiSting
 rp      path canonicalization (with RealPath)
+stat		stat each path, printf(fmt) with results (like find printf)
 
 /* (-f) path references a plain file */
 /* (-d) path references a directory */
