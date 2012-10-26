@@ -80,7 +80,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		}
 	}
 
-	lstack_sel_write(ls, news, newsl);
+	fatal(lstack_sel_write, ls, news, newsl);
 
 	return 1;
 }

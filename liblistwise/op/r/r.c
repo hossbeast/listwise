@@ -48,7 +48,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			a++;
 
 		int b = (ls->sel.sl * 8) + 7;
-		while((ls->sel.s[b/8] & (0x01 << (b%8))) == 0)
+		while((b/8) >= ls->sel.sl || (ls->sel.s[b/8] & (0x01 << (b%8))) == 0)
 			b--;
 
 		int x;

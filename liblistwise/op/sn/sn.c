@@ -36,24 +36,44 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	int l = 0;
+	int * mema = alloca((ls->sel.l ?: ls->s[0].l) * sizeof(mema[0]));
+	int * memb = 0;
 
-	if(ls->sel.l)
+	int x;
+	int i = 0;
+	for(x = 0; x < ls->s[0].l; x++)
 	{
-		l = ls->sel.l;
-	}
-	else
-	{
-		int compar(const void * _A, const void * _B)
+		int go = 1;
+		if(ls->sel.l)
 		{
-			typeof(ls->s[0].s[0]) * A = (void*)_A;
-			typeof(ls->s[0].s[0]) * B = (void*)_B;
+			if(ls->sel.l <= (x/8))
+				break;
 
-			return atoi(A->s) - atoi(B->s);
-		};
+			go = (ls->sel.s[x/8] & (0x01 << (x%8)));
+		}
 
-		qsort(ls->s[0].s, ls->s[0].l, sizeof(ls->s[0].s[0]), compar);
+		if(go)
+			mema[i++] = x;
+	}	
+
+	memb = alloca(i * sizeof(memb[0]));
+	memcpy(memb, mema, i * sizeof(memb[0]));
+
+	int compar(const void * _A, const void * _B)
+	{
+		typeof(ls->s[0].s[0]) * A = &ls->s[0].s[*(int*)_A];
+		typeof(ls->s[0].s[0]) * B = &ls->s[0].s[*(int*)_B];
+
+		return atoi(A->s) - atoi(B->s);
 	}
+
+	qsort(mema, i, sizeof(mema[0]), compar);
+
+	typeof(ls->s[0].s[0]) * T = alloca(ls->s[0].l * sizeof(T[0]));
+	memcpy(T, ls->s[0].s, ls->s[0].l * sizeof(T[0]));
+
+	for(x = 0; x < i; x++)
+		ls->s[0].s[memb[x]] = T[mema[x]];
 
 	return 1;
 }

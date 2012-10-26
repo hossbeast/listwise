@@ -154,6 +154,7 @@ void API lstack_free(lstack* ls)
 		free(ls->s);
 	}
 
+	free(ls->sel.s);
 	free(ls);
 }
 

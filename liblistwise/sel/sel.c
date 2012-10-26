@@ -33,7 +33,7 @@ int API lstack_sel_set(lstack* const restrict ls, int y)
 	ls->sel.sl = MAX(ls->sel.sl, (y/8)+1);
 
 	// set this particular bit
-	if(ls->sel.s[y/8] & (0x01 << (y%8)))
+	if((ls->sel.s[y/8] & (0x01 << (y%8))) == 0)
 		ls->sel.l++;
 
 	ls->sel.s[y/8] |= (0x01 << y%8);
