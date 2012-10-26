@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <fcntl.h>
 
 #include <listwise.h>
 #include <listwise/operator.h>
@@ -20,6 +21,13 @@
 int main(int argc, char** argv)
 {
 	int x = parse_args(argc, argv);
+
+	// arrange for liblistwise to write errors to /dev/null
+	if(!g_args.dump)
+	{
+		int efd = open("/dev/null", O_WRONLY);
+		dup2(efd, listwise_err_fd);
+	}
 
 	// generator parser
 	generator_parser* p = 0;
@@ -125,6 +133,7 @@ int main(int argc, char** argv)
 
 		// OUTPUT
 
+		int i = 0;
 		for(x = 0; x < ls->s[0].l; x++)
 		{
 			int go = 1;
@@ -139,7 +148,7 @@ int main(int argc, char** argv)
 			if(go)
 			{
 				if(g_args.number)
-					printf("%3d %.*s", x, ls->s[0].s[x].l, ls->s[0].s[x].s);
+					printf("%3d %.*s", i++, ls->s[0].s[x].l, ls->s[0].s[x].s);
 				else
 					printf("%.*s", ls->s[0].s[x].l, ls->s[0].s[x].s);
 

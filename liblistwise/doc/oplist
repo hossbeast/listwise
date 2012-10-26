@@ -1,30 +1,37 @@
 selection operators
 m       Match
 v       inVert selection
-n       select by Number
 u       select Unique
 z       select none
 
-
-translation operators
+inplace translation operators
 s       Substitution
-y       transliteration
 
 operators
 d       sunDer selected
 cs      Coalesce
 x       eXchange
 
-operators
+inplce operators
 r       Reverse
 ss      Sort Strings (asc)
 sn      Sort Numeric (asc)
 
-filesystem operators
-ls      directory LiSting
+inplace filesystem operators
 rp      path canonicalization (with RealPath)
-stat		stat each path, printf(fmt) with results (like find printf)
 
-/* (-f) path references a plain file */
-/* (-d) path references a directory */
-/* (-l) path references a symbolic link */
+listpush filesystem operators
+ls      directory LiSting
+
+selection filesystem operators
+-f      path references a plain file
+-d      path references a directory
+-l      path references a symbolic link
+
+
+
+/* n       select by Number */
+/* y       transliteration */
+/* window of characters in the string */
+/* window of strings in the list */ 
+/* stat		stat each path, printf(fmt) with results (like find printf) */

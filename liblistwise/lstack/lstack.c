@@ -100,6 +100,24 @@ static int writestack(lstack* const restrict ls, int x, int y, const char* const
 	return 1;
 }
 
+static int vwritestack(lstack* const restrict ls, int x, int y, const char* const restrict fmt, va_list va)
+{
+	va_list va2;
+	va_copy(va2, va);
+
+	int l = vsnprintf(0, 0, fmt, va);
+	va_end(va);
+
+	fatal(ensure, ls, x, y, l + 1);
+
+	vsprintf(ls->s[x].s[y].s, fmt, va2);
+	va_end(va2);
+
+	ls->s[x].s[y].l = l;
+
+	return 1;
+}
+
 //
 // API
 //
@@ -249,20 +267,7 @@ int API lstack_writef(lstack* const restrict ls, int x, int y, const char* const
 	va_list va;
 	va_start(va, fmt);
 
-	va_list va2;
-	va_copy(va2, va);
-
-	int l = vsnprintf(0, 0, fmt, va);
-	va_end(va);
-
-	fatal(ensure, ls, x, y, l + 1);
-
-	vsprintf(ls->s[x].s[y].s, fmt, va2);
-	va_end(va2);
-
-	ls->s[x].s[y].l = l;
-
-	return 1;
+	return vwritestack(ls, x, y, fmt, va);
 }
 
 int API lstack_add(lstack* const restrict ls, const char* const restrict s, int l)
@@ -272,7 +277,10 @@ int API lstack_add(lstack* const restrict ls, const char* const restrict s, int 
 
 int API lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
 {
-	return 0;
+	va_list va;
+	va_start(va, fmt);
+
+	return vwritestack(ls, 0, ls->l ? ls->s[0].l : 0, fmt, va);
 }
 
 int API lstack_push(lstack* const restrict ls)

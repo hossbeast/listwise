@@ -31,7 +31,7 @@ all: ${LIB} ${OPLIST}
 #
 # required objects
 #
-SOURCES          =$(shell ls -1 */*.c)
+SOURCES          =$(shell ls -1 *.c */*.c)
 SOURCES					+=generator/generator.lex.c
 SOURCES					+=generator/generator.tab.c
 
@@ -51,7 +51,7 @@ LOPTS            =-lpcre -ldl -shared -Wl,--version-script=exports -Wl,-soname,$
 
 # link the library
 ${LIB}: ${SOURCES:.c=.o} exports
-	${CC} ${COPTS} ${CFLAGS} -o $@ */*.o ${LOPTS} ${LFLAGS}
+	${CC} ${COPTS} ${CFLAGS} -o $@ *.o */*.o ${LOPTS} ${LFLAGS}
 
 # link an operator so
 %.so: %.o

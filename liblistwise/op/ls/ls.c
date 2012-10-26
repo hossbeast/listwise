@@ -76,7 +76,7 @@ static int listing(lstack* ls, char * s)
 	}
 	else
 	{
-		fail("opendir('%s')=[%d][%s]", s, errno, strerror(errno));
+		dprintf(listwise_err_fd, "opendir('%s')=[%d][%s]\n", s, errno, strerror(errno));
 	}
 
 	closedir(dd);

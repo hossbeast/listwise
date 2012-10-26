@@ -1,6 +1,8 @@
 #include "listwise/internal.h"
 #include "control.h"
 
+int APIDATA listwise_err_fd = 2;
+
 int listwise_exec(char* s, int l, char** init, int* initls, int initl, lstack** ls)
 {
 	// generator parser
@@ -10,13 +12,13 @@ int listwise_exec(char* s, int l, char** init, int* initls, int initl, lstack** 
 	generator* g = 0;
 
 	if(generator_mkparser(&p) == 0)
-		FAIL("mkparser failed\n");
+		fail("mkparser failed\n");
 
 	if(generator_parse(p, s, l, &g) == 0)
-		FAIL("parse failed\n");
+		fail("parse failed\n");
 
 	if(lstack_exec(g, init, initls, initl, ls) == 0)
-		FAIL("lstack_exec failed");
+		fail("lstack_exec failed");
 
 	generator_free(g);
 	generator_parser_free(p);

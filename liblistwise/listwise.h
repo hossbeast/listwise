@@ -67,4 +67,12 @@ void lstack_free(lstack*);
 //
 void lstack_xfree(lstack**);
 
+/// listwise_err_fd
+//
+// listwise operators write errors to this fd (ls a nonexistent path, for example)
+//
+// default value : 2
+//
+int listwise_err_fd;
+
 #endif
