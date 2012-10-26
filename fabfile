@@ -1,0 +1,15 @@
+listwise : main.o
+
+main.o : main.c
+main.o : args.o
+
+args.o : args.c
+args.o : args.h
+
+listwise {
+	gcc -m64 -O3 -Werror -D_GNU_SOURCE -fPIC -o $@.path $@.edepso -llistwise
+}
+
+main.o args.o {
+	gcc -m64 -O3 -Werror -D_GNU_SOURCE -fPIC -c $@.idepsc -o $@.path
+}
