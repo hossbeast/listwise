@@ -61,7 +61,8 @@ static int listing(lstack* ls, char * s)
 			{
 				if(entp)
 				{
-					fatal(lstack_addf, ls, "%s/%s", s, entp->d_name);
+					if(strcmp(entp->d_name, ".") && strcmp(entp->d_name, ".."))
+						fatal(lstack_addf, ls, "%s/%s", s, entp->d_name);
 				}
 				else
 				{

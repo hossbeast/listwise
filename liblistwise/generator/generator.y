@@ -17,6 +17,7 @@
 %parse-param { void* scanner }
 %parse-param { parse_param* parm }
 %lex-param { void* scanner }
+%expect 1
 
 %union {
 	operator *		op;

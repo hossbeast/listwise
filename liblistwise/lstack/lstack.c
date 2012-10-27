@@ -170,9 +170,9 @@ void API lstack_free(lstack* ls)
 		}
 
 		free(ls->s);
+		free(ls->sel.s);
 	}
 
-	free(ls->sel.s);
 	free(ls);
 }
 
@@ -316,4 +316,32 @@ int API lstack_recycle(lstack* const restrict ls)
 int API lstack_xchg(lstack* const restrict ls)
 {
 	return 0;
+}
+
+int API lstack_merge(lstack* const restrict ls, int to, int from)
+{
+	fatal(ensure, ls, to, -1, -1);
+	int tox = ls->s[to].l;
+	fatal(ensure, ls, to, ls->s[to].l + ls->s[from].l - 1, -1);
+
+	memcpy(
+		  ls->s[to].s + tox
+		, ls->s[from].s
+		, ls->s[from].l * sizeof(ls->s[0].s[0])
+	);
+
+	ls->s[from].a = 0;
+	ls->s[from].l = 0;
+
+	while(from < ls->l && ls->s[from].l == 0)
+		from++;
+	from--;
+
+	while(from >= 0 && ls->s[from].l == 0)
+		from--;
+	from++;
+
+	ls->l = from;
+
+	return 1;
 }
