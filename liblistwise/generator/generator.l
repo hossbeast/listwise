@@ -6,12 +6,12 @@
 
 	void generator_yyerror(void* scanner, parse_param* pp, char const* err);
 
-#define PTOKEN(token)																																								\
-		token == OP ?   printf("%3d: OP   - %s (%p)\n", __LINE__, yylval->op->s, yylval->op)						\
-	: token == STR ?  printf("%3d: STR  - '%.*s'\n", __LINE__, yylval->strseg.l, yylval->strseg.s)		\
-	: token == BREF ? printf("%3d: BREF - '%.*s'\n", __LINE__, yylval->strseg.l, yylval->strseg.s)		\
-	: token == VREF ? printf("%3d: VREF - '%.*s'\n", __LINE__, yylval->strseg.l, yylval->strseg.s)		\
-	:                 printf("%3d: TOK  - '%c' (%d)\n", __LINE__, token, token)
+#define PTOKEN(token)																																													\
+		token == OP ?   printf("%3d: OP   - '%.*s' (%p)\n", __LINE__, yylval->str.l, yylval->str.s, yylval->op.v)	\
+	: token == STR ?  printf("%3d: STR  - '%.*s'\n"			, __LINE__, yylval->str.l, yylval->str.s)								\
+	: token == I64 ?  printf("%3d: I64  - '%.*s'\n"			, __LINE__, yylval->str.l, yylval->str.s)								\
+	: token == BREF ? printf("%3d: BREF - '%.*s'\n"			, __LINE__, yylval->str.l, yylval->str.s)								\
+	:                 printf("%3d: TOK  - (%c) (%d)\n"	, __LINE__, token, token)
 
 #if 0
 #	define LEX(token) PTOKEN(token), token
@@ -30,34 +30,38 @@
 
 %%
 
+\\[/]						{
+									yylval->str.s = strdup("/");
+									yylval->str.l = 1;
+									return LEX(STR);
+								}
 [/]							{ return LEX(yytext[0]); }
 \\[0-9]+				{
-									yylval->strseg.s = strdup(yytext);
-									yylval->strseg.l = yyleng;
+									yylval->bref.s = strdup(yytext);
+									yylval->bref.l = yyleng;
+									sscanf(yytext + 1, "%d", &yylval->bref.v);
 									return LEX(BREF);
 								}
-\$\{[a-zA-Z_][a-zA-Z0-9_]*\} {
-									yylval->strseg.s = strdup(yytext);
-									yylval->strseg.l = yyleng;
-									return LEX(VREF);
+-?[0-9]+				{
+									yylval->i64.s = strdup(yytext);
+									yylval->i64.l = yyleng;
+									sscanf(yytext, "%ld", &yylval->i64.v);
+									return LEX(I64);
 								}
 [^\\/<]+				{
+									yylval->str.s = strdup(yytext);
+									yylval->str.l = yyleng;
+
 									// determine whether this string happens to be an operator
-									if((yylval->op = op_lookup(yytext, yyleng)))
-									{
+									if((yylval->op.v = op_lookup(yytext, yyleng)))
 										return LEX(OP);
-									}
 									else
-									{
-										yylval->strseg.s = strdup(yytext);
-										yylval->strseg.l = yyleng;
 										return LEX(STR);
-									}
 								}
 "<"							{
 									/* literal string */
-									yylval->strseg.s = 0;
-									yylval->strseg.l = 0;
+									yylval->str.s = 0;
+									yylval->str.l = 0;
 									int a = 0;
 									int n = 0;
 
@@ -80,12 +84,12 @@
 												{
 													break;
 												}
-												else if(yylval->strseg.l == a)
+												else if(yylval->str.l == a)
 												{
-													yylval->strseg.s = realloc(yylval->strseg.s, yylval->strseg.l + 11);
+													yylval->str.s = realloc(yylval->str.s, yylval->str.l + 11);
 													a += 10;
 												}
-												yylval->strseg.s[yylval->strseg.l++] = c;
+												yylval->str.s[yylval->str.l++] = c;
 											}
 
 											n = 0;

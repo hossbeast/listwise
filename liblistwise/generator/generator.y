@@ -17,17 +17,35 @@
 %parse-param { void* scanner }
 %parse-param { parse_param* parm }
 %lex-param { void* scanner }
-%expect 1
+%expect 5
 
 %union {
-	operator *		op;
-
-	struct
+	struct								// string segment
 	{
 		char*				s;
 		int					l;
-		int					k;
-	}							strseg;					/* string segment */
+	}							str;
+
+	struct
+	{
+		char *			s;
+		int					l;
+		operator *	v;
+	}							op;
+
+	struct
+	{
+		char *			s;
+		int					l;
+		int					v;
+	}							bref;
+
+	struct
+	{
+		char *			s;
+		int					l;
+		int64_t			v;
+	}							i64;
 
 	struct items
 	{
@@ -44,12 +62,11 @@
 
 %token	<op>			'/'
 
-%token	<strseg>	STR		"string"
-%token	<strseg>	BREF	"backreference"
-%token	<strseg>	VREF	"var-reference"
-%token	<op>			OP		"operator"
+%token	<str>			STR
+%token	<bref>		BREF
+%token  <i64>		  I64
+%token	<op>			OP
 
-%type		<strseg>	strseg
 %type		<items>		items
 %type		<items>		string
 
@@ -128,19 +145,52 @@ items
 	{
 		$$ = calloc(1, sizeof(*$$));
 		$$->t  = 1;
-		$$->op = $1;
+		$$->op = $1.v;
+
+		free($1.s);
 	}
-	| string
-	|
+	| I64
 	{
 		$$ = calloc(1, sizeof(*$$));
 		$$->t = 2;
-		$$->arg = calloc(1, sizeof(*$$->arg));
+
+		$$->arg = calloc(1, sizeof(*$$->arg));		
+		arg * A = $$->arg;
+
+		A->l = $1.l;
+		A->s = $1.s;
+
+		A->itype = ITYPE_I64;
+		A->i64 = $1.v;
 	}
+	| string
 	;
 
 string
-	: string strseg
+	: string STR
+	{
+		$$ = $1;
+
+		arg * A = $$->arg;
+		char* o = A->s;
+
+		// reallocate the string value of the argument
+		A->s = realloc(A->s, A->l + $2.l + 1);
+		memcpy(A->s + A->l, $2.s, $2.l);
+		A->s[A->l + $2.l] = 0;
+
+		// update string pointers on previous references
+		int x;
+		for(x = 0; x < A->refsl; x++)
+		{
+			A->refs[x].s = A->s + (A->refs[x].s - o);
+			A->refs[x].e = A->refs[x].s + A->refs[x].l;
+		}
+
+		A->l += $2.l;
+		free($2.s);
+	}
+	| string BREF
 	{
 		$$ = $1;
 
@@ -161,23 +211,21 @@ string
 		}
 
 		// use new reference, if there is one
-		if($2.k)
-		{
-			A->refs = realloc(A->refs, (A->refsl + 1) * sizeof(*A->refs));
+		A->refs = realloc(A->refs, (A->refsl + 1) * sizeof(*A->refs));
 
-			A->refs[A->refsl].s = A->s + A->l;
-			A->refs[A->refsl].l = $2.l;
-			A->refs[A->refsl].e = A->s + A->l + $2.l;
-			A->refs[A->refsl].k = $2.k;
+		A->refs[A->refsl].s = A->s + A->l;
+		A->refs[A->refsl].l = $2.l;
+		A->refs[A->refsl].e = A->s + A->l + $2.l;
+		A->refs[A->refsl].k = REFTYPE_BREF;
+		A->refs[A->refsl].bref = $2.v;
 
-			A->ref_last = &A->refs[A->refsl];
-			A->refsl++;
-		}
+		A->ref_last = &A->refs[A->refsl];
+		A->refsl++;
 
 		A->l += $2.l;
 		free($2.s);
 	}
-	| strseg
+	| STR
 	{
 		$$ = calloc(1, sizeof(*$$));
 		$$->t = 2;
@@ -185,41 +233,38 @@ string
 		$$->arg = calloc(1, sizeof(*$$->arg));
 		arg * A = $$->arg;
 
+		A->s = $1.s;
 		A->l = $1.l;
-		A->s = calloc(1, A->l + 1);
-		memcpy(A->s, $1.s, A->l);
-
-		if($1.k)
-		{
-			A->refs = malloc(sizeof(*A->refs));
-
-			A->refs[0].s = A->s;
-			A->refs[0].l = A->l;
-			A->refs[0].e = A->s + A->l;
-			A->refs[0].k = $1.k;
-
-			A->ref_last = &A->refs[0];
-			A->refsl = 1;
-		}
-
-		free($1.s);
-	}
-	;
-
-strseg
-	: STR
-	{
-		$$ = $1;
-		$$.k = 0;
-	}
-	| VREF
-	{
-		$$ = $1;
-		$$.k = REFTYPE_VREF;
 	}
 	| BREF
 	{
-		$$ = $1;
-		$$.k = REFTYPE_BREF;
+		$$ = calloc(1, sizeof(*$$));
+		$$->t = 2;
+
+		$$->arg = calloc(1, sizeof(*$$->arg));
+		arg * A = $$->arg;
+
+		A->s = $1.s;
+		A->l = $1.l;
+
+		A->refs = malloc(sizeof(*A->refs));
+
+		A->refs[0].s = A->s;
+		A->refs[0].l = A->l;
+		A->refs[0].e = A->s + A->l;
+		A->refs[0].k = REFTYPE_BREF;
+		A->refs[0].bref = $1.v;
+
+		A->ref_last = &A->refs[0];
+		A->refsl = 1;
+	}
+	|
+	{
+		$$ = calloc(1, sizeof(*$$));
+		$$->t = 2;
+
+		$$->arg = calloc(1, sizeof(*$$->arg));
+		arg * A = $$->arg;
+		A->s = strdup("");
 	}
 	;

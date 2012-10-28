@@ -24,8 +24,13 @@ struct arg;
 //
 enum
 {
-	  OPTYPE_GENERAL
-	, OPTYPE_SELECTION
+	  LWOP_SELECTION_READ					= 0x01			// uses the current selection
+	, LWOP_SELECTION_WRITE				= 0x02			// modifies the current selection
+	, LWOP_MODIFIERS_CANHAVE			= 0x04			// last argument is a modifiers string
+	, LWOP_ARGS_CANHAVE						= 0x10			// can have arguments
+	, LWOP_OPERATION_PUSHBEFORE		= 0x20			// first operation is to push an empty list
+	, LWOP_OPERATION_INPLACE			= 0x40			// modifies the string in the top list in-place
+	, LWOP_OPERATION_FILESYSTEM		= 0x80			// filesystem operator
 };
 
 //
@@ -33,9 +38,9 @@ enum
 //
 typedef struct operator
 {
-	void *	handle;		// dlopen handle
-	int			type;			// OPTYPE_*
-	char*		desc;			// operator descriptions
+	void *		handle;		// dlopen handle
+	uint64_t	optype;		// OPTYPE_*
+	char*			desc;			// operator description
 
 	// methods
 	int 		(*op_validate)(struct operation*);
@@ -50,8 +55,7 @@ typedef struct operator
 //
 enum
 {
-	  REFTYPE_VREF = 1
-	, REFTYPE_BREF
+	REFTYPE_BREF = 10
 };
 
 //
@@ -59,8 +63,6 @@ enum
 //
 typedef struct arg
 {
-	struct arg*				next;
-
 	char*		s;		// string value of the arg, null-terminated
 	int			l;		// string length
 
@@ -75,13 +77,15 @@ typedef struct arg
 		union
 		{
 			int		bref;		// for REFTYPE_BREF, value of the backreference
-			char*	vref;		// for REFTYPE_VREF, value of the variable reference
 		};
 	}				*refs;
 	int			refsl;	// number of references
 
 	// pointer to the last reference, if any
 	struct ref* ref_last;
+
+#define ITYPE_RE		1
+#define ITYPE_I64		2
 
 	// indicates which member of the interpreted value union to use
 	uint8_t						itype;
@@ -95,14 +99,7 @@ typedef struct arg
 			int						c_caps;
 		}								re;
 
-		int8_t					i8;
-		int16_t					i16;
-		int32_t					i32;
 		int64_t					i64;
-		uint8_t					u8;
-		uint16_t				u16;
-		uint32_t				u32;
-		uint64_t				u64;
 	};
 } arg;
 
@@ -213,6 +210,20 @@ int lstack_sel_set(lstack* const restrict ls, int y)
 //
 int lstack_sel_write(lstack* const restrict ls, uint8_t * news, int newsl)
 	__attribute__((nonnull));
+
+/// ensure
+//
+// ensure stack/list allocation up to the specified dimensions
+//
+// parameters
+//   x - zero based list index       ( or -1 to skip stack allocation)
+//   y - zero based string index     ( or -1 to skip list allocation)
+//   z - zero based character index  ( or -1 to skip string allocation)
+//
+// updates stack and list length to be at least the dimension specified
+//  ** this is NOT done for string length **
+//
+int lstack_ensure(lstack* const restrict ls, int x, int y, int z);
 
 /// re_compile
 //

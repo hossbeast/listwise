@@ -8,7 +8,7 @@
 
 /*
 
-d operator - sunDer selected (delete)
+d operator - sunDer selected (Delete)
 
 NO ARGUMENTS
 
@@ -16,8 +16,7 @@ OPERATION
 
 	1. push an empty list on the stack
 	2. invert the current selection
-	2. foreach item that is selected, or all items on top list
-	   2.1. move that item to the top list
+	3. move all selected items to the top list
 
 */
 

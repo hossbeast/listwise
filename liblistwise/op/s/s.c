@@ -6,8 +6,6 @@
 
 #include "control.h"
 
-#include "parseint.h"
-
 /*
 
 s operator - search and replace
@@ -22,7 +20,7 @@ OPERATION
 
 	1. foreach item in selection, or, if no selection, in top list
 	2. if regex matches, apply replacement
-	3. if the m modifier is present, change the selection to be those items which matched
+	3. if the y modifier is present, change the selection to be those items which matched
 
 */
 
@@ -49,25 +47,14 @@ int op_validate(operation* o)
 			fatal(re_compile, o->args[0]->s, &o->args[0]->re, o->args[2]->s);
 	}
 	else
-		fail("s -- argsl: %d", o->argsl);
+		fail("s -- requires 2 or 3 args, actual: %d", o->argsl);
 
-	o->args[0]->itype = 1;
+	o->args[0]->itype = ITYPE_RE;
 
 	// validate backreferences in the substitution string
 	int x;
 	for(x = 0; x < o->args[1]->refsl; x++)
 	{
-		fatal(parseint
-			, o->args[1]->refs[x].s + 1	// 1 for the backslash
-			, SCNd8
-			, 0
-			, 32
-			, 0
-			, 2
-			, &o->args[1]->refs[x].bref
-			, 0
-		);
-
 		if(o->args[1]->refs[x].bref > o->args[0]->re.c_caps)
 		{
 			fail("backref: %d, captures: %d", o->args[1]->refs[x].bref, o->args[0]->re.c_caps);
@@ -80,7 +67,7 @@ int op_validate(operation* o)
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
 	int isglobal = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'g');
-	int isselect = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'm');
+	int isselect = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'y');
 
 	int newsl = (ls->s[0].l / 8) + 1;
 	uint8_t* news;

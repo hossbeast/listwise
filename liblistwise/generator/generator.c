@@ -127,7 +127,7 @@ void API generator_free(generator* g)
 			free(g->args[x]->s);
 			free(g->args[x]->refs);
 
-			if(g->args[x]->itype)
+			if(g->args[x]->itype == ITYPE_RE)
 			{
 				free(g->args[x]->re.c_pcre);
 				free(g->args[x]->re.c_pcre_extra);
@@ -146,7 +146,7 @@ void API generator_free(generator* g)
 				free(g->ops[x]->args[y]->s);
 				free(g->ops[x]->args[y]->refs);
 
-				if(g->ops[x]->args[y]->itype)
+				if(g->ops[x]->args[y]->itype == ITYPE_RE)
 				{
 					free(g->ops[x]->args[y]->re.c_pcre);
 					free(g->ops[x]->args[y]->re.c_pcre_extra);

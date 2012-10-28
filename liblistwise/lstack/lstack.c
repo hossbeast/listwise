@@ -16,18 +16,6 @@
 // static
 //
 
-/// ensure
-//
-// ensure stack/list allocation up to the specified dimensions
-//
-// parameters
-//   x - zero based list index       ( or -1 to skip stack allocation)
-//   y - zero based string index     ( or -1 to skip list allocation)
-//   z - zero based character index  ( or -1 to skip string allocation)
-//
-// updates stack and list length to be at least the dimension specified
-//  ** this is NOT done for string length **
-//
 static int ensure(lstack * const restrict ls, int x, int y, int z)
 {
 	if(x >= 0)
@@ -205,9 +193,9 @@ void API lstack_dump(lstack* ls)
 {
 	int x;
 	int y;
-	for(x = 0; x < ls->l; x++)
+	for(x = ls->l - 1; x >= 0; x--)
 	{
-		if(x)
+		if(x != ls->l - 1)
 			printf("\n");
 
 		for(y = 0; y < ls->s[x].l; y++)
@@ -344,4 +332,9 @@ int API lstack_merge(lstack* const restrict ls, int to, int from)
 	ls->l = from;
 
 	return 1;
+}
+
+int API lstack_ensure(lstack * const restrict ls, int x, int y, int z)
+{
+	return ensure(ls, x, y, z);
 }

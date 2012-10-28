@@ -9,13 +9,15 @@ s       Substitution
 
 operators
 d       sunDer selected
-cs      Coalesce
+c       Coalesce
 x       eXchange
 
 inplce operators
 r       Reverse
 ss      Sort Strings (asc)
 sn      Sort Numeric (asc)
+
+o       Or - 
 
 inplace filesystem operators
 rp      path canonicalization (with RealPath)
@@ -30,8 +32,11 @@ selection filesystem operators
 
 
 
-/* n       select by Number */
-/* y       transliteration */
-/* window of characters in the string */
-/* window of strings in the list */ 
-/* stat		stat each path, printf(fmt) with results (like find printf) */
+/* n     select by Number */
+/* y     transliteration */
+/* w     window of characters in the string */
+/* wl    window of strings in the list */ 
+/* st    stat each path, printf(fmt) with results (like find printf) */
+
+/*    aggregate math operations    */
+/* sum/avg/stddev - push, write 1 entry with results */
