@@ -5,6 +5,7 @@
 #include <listwise/operator.h>
 
 #include "control.h"
+#include "xmem.h"
 
 /*
 
@@ -43,8 +44,10 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	{
 		if(ls->sel.sa < ls->last.sl)
 		{
-			fatal(xrealloc, &ls->sel.s, sizeof(*ls->sel.s), ls->last.sl, ls->sel.sa);
-			ls->last.sa = ls->last.sl;
+			if((ls->sel.s = calloc(1, ls->last.sl * sizeof(*ls->sel.s))) == 0)
+				return 0;
+
+			ls->sel.sa = ls->last.sl;
 		}
 
 		memcpy(
