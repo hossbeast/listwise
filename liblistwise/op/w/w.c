@@ -31,7 +31,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_SELECTION_READ | LWOP_ARGS_CANHAVE | LWOP_OPERATION_INPLACE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	w - "
@@ -49,22 +49,11 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	int isselect = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'y');
-
-	int newsl = (ls->s[0].l / 8) + 1;
-	uint8_t* news;
-
-	if(isselect)
-	{
-		news = alloca(newsl);
-		memset(news, 0, newsl);
-	}
-
 	int x;
 	for(x = 0; x < ls->s[0].l; x++)
 	{
 		int go = 1;
-		if(ls->sel.l)
+		if(!ls->sel.all)
 		{
 			if(ls->sel.sl <= (x/8))
 				break;
@@ -96,20 +85,16 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 				ss[ssl] = 0;
 
 				// clear this string on the stack
-				lstack_clear(ls, 0, x);
+				fatal(lstack_clear, ls, 0, x);
 
+				// write new string using the window
 				fatal(lstack_write, ls, 0, x, ss + off, len);
 
-				if(isselect)
-				{
-					news[x/8] |= (0x01 << (x%8));
-				}
+				// record this index was hit
+				fatal(lstack_last_set, ls, x);
 			}
 		}
 	}
-
-	if(isselect)
-		fatal(lstack_sel_write, ls, news, newsl);
 
 	return 1;
 }

@@ -28,7 +28,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype				= LWOP_SELECTION_READ | LWOP_MODIFIERS_CANHAVE | LWOP_ARGS_CANHAVE | LWOP_OPERATION_INPLACE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	s - "
@@ -67,16 +67,6 @@ int op_validate(operation* o)
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
 	int isglobal = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'g');
-	int isselect = o->argsl == 3 && o->args[2]->l && strchr(o->args[2]->s, 'y');
-
-	int newsl = (ls->s[0].l / 8) + 1;
-	uint8_t* news;
-
-	if(isselect)
-	{
-		news = alloca(newsl);
-		memset(news, 0, newsl);
-	}
 
 	int x;
 	for(x = 0; x < ls->s[0].l; x++)
@@ -210,16 +200,10 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 					, ssl - loff
 				);
 
-				if(isselect)
-				{
-					news[x/8] |= (0x01 << (x%8));
-				}
+				fatal(lstack_last_set, ls, x);
 			}
 		}
 	}
-
-	if(isselect)
-		fatal(lstack_sel_write, ls, news, newsl);
 
 	return 1;
 }

@@ -35,7 +35,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_SELECTION_READ | LWOP_SELECTION_RESET | LWOP_ARGS_CANHAVE | LWOP_OPERATION_PUSHBEFORE | LWOP_OPERATION_FILESYSTEM
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	ls- "
@@ -99,7 +99,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		for(x = 0; x < ls->s[1].l; x++)
 		{
 			int go = 1;
-			if(ls->sel.l)
+			if(!ls->sel.all)
 			{
 				if(ls->sel.sl <= (x/8))
 					break;
@@ -113,7 +113,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	}
 
 	// if anything was selected, its now used up
-	fatal(lstack_sel_clear, ls);
+	fatal(lstack_sel_all, ls);
 
 	return 1;
 }

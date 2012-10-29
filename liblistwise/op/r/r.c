@@ -19,7 +19,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_SELECTION_READ
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	r - "
@@ -39,9 +39,13 @@ void swap(lstack* ls, int a, int b)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	int l = 0;
-
-	if(ls->sel.l)
+	if(ls->sel.all || ls->sel.l == ls->s[0].l)
+	{
+		int x;
+		for(x = 0; x < (ls->s[0].l / 2); x++)
+			swap(ls, x, ls->s[0].l - 1 - x);
+	}
+	else
 	{
 		int a = 0;
 		while((ls->sel.s[a/8] & (0x01 << (a%8))) == 0)
@@ -62,12 +66,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			while((ls->sel.s[b/8] & (0x01 << (b%8))) == 0)
 				b--;
 		}
-	}
-	else
-	{
-		int x;
-		for(x = 0; x < (ls->s[0].l / 2); x++)
-			swap(ls, x, ls->s[0].l - 1 - x);
 	}
 
 	return 1;

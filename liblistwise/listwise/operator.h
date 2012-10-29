@@ -24,13 +24,14 @@ struct arg;
 //
 enum
 {
-	  LWOP_SELECTION_READ					= 0x01			// uses the current selection
-	, LWOP_SELECTION_WRITE				= 0x02			// modifies the current selection
-	, LWOP_MODIFIERS_CANHAVE			= 0x04			// last argument is a modifiers string
-	, LWOP_ARGS_CANHAVE						= 0x10			// can have arguments
-	, LWOP_OPERATION_PUSHBEFORE		= 0x20			// first operation is to push an empty list
-	, LWOP_OPERATION_INPLACE			= 0x40			// modifies the string in the top list in-place
-	, LWOP_OPERATION_FILESYSTEM		= 0x80			// filesystem operator
+	  LWOP_SELECTION_READ					= 0x0001			// uses the current selection
+	, LWOP_SELECTION_WRITE				= 0x0002			// implicitly apply the y operator after this operator
+	, LWOP_SELECTION_RESET				= 0x0004			// resets the current selection
+	, LWOP_MODIFIERS_CANHAVE			= 0x0008			// last argument is a modifiers string
+	, LWOP_ARGS_CANHAVE						= 0x0010			// can have arguments
+	, LWOP_OPERATION_PUSHBEFORE		= 0x0020			// first operation is to push an empty list
+	, LWOP_OPERATION_INPLACE			= 0x0040			// modifies the string in the top list in-place
+	, LWOP_OPERATION_FILESYSTEM		= 0x0080			// filesystem operator
 };
 
 //

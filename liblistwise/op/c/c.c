@@ -24,7 +24,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_ARGS_CANHAVE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	c - "
@@ -48,8 +48,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	if(o->argsl)
 		from = o->args[0]->i64;
 
-printf("from=%d\n", from);
-
 	if(from < 0)
 		from = ls->l + from;
 
@@ -57,6 +55,6 @@ printf("from=%d\n", from);
 	for(x = from; x >= 1; x--)
 		fatal(lstack_merge, ls, 0, x);
 
-	fatal(lstack_sel_clear, ls);
+	fatal(lstack_sel_none, ls);
 	return 1;
 }

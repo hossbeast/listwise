@@ -24,7 +24,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_SELECTION_RESET
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	d - "
@@ -32,9 +32,6 @@ operator op_desc = {
 
 int op_validate(operation* o)
 {
-	if(o->argsl)
-		fail("d -- arguments : %d", o->argsl);
-
 	return 1;
 }
 
@@ -42,7 +39,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
 	fatal(lstack_push, ls);
 
-	if(ls->sel.l)
+	if(ls->sel.all || ls->sel.l == ls->s[1].l)
 	{
 		fatal(lstack_ensure, ls, 0, ls->s[1].l - ls->sel.l - 1, -1);
 
@@ -75,5 +72,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		ls->s[1] = T;
 	}
 
-	fatal(lstack_sel_clear, ls);
+	fatal(lstack_sel_none, ls);
 }

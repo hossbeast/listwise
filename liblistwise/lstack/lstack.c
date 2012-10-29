@@ -106,15 +106,17 @@ static int vwritestack(lstack* const restrict ls, int x, int y, const char* cons
 	return 1;
 }
 
-//
-// API
-//
-
-int API lstack_exec(generator* g, char** init, int* initls, int initl, lstack** ls)
+static int exec_internal(generator* g, char** init, int* initls, int initl, lstack** ls, int dump)
 {
 	// ovec workspace
 	int* ovec = 0;
 	int ovec_len = 0;
+
+	// empty operation for implicit y operator execution
+	operator* yop = op_lookup("y", 1);
+	operator* oop = op_lookup("o", 1);
+
+	struct operation yoper = { .op = yop };
 
 	// list stack allocation
 	if(!*ls)
@@ -133,14 +135,73 @@ int API lstack_exec(generator* g, char** init, int* initls, int initl, lstack** 
 		fatal(writestack, *ls, 0, x + initl, g->args[x]->s, g->args[x]->l);
 	}
 
-	// execute all operators
+	// the initial state of the selection is all
+	fatal(lstack_sel_all, *ls);
+
+	// execute all operations
+	int isor = 0;
 	for(x = 0; x < g->opsl; x++)
 	{
+		isor = 0;
+		if(g->ops[x]->op == oop)
+		{
+			isor = 1;
+			if(++x == g->opsl)
+				break;
+		}
+
+		if(!isor)
+		{
+			if(x && (g->ops[x-1]->op->optype & LWOP_SELECTION_WRITE))
+				fatal(yoper.op->op_exec, &yoper, *ls, &ovec, &ovec_len);
+
+			if(g->ops[x]->op != yop)
+				fatal(lstack_last_clear, *ls);
+		}
+
+		if(dump)
+		{
+			if(x)
+				lstack_dump(*ls);
+
+			printf("\n");
+			printf(" >> %s", g->ops[x]->op->s);
+
+			int y;
+			for(y = 0; y < g->ops[x]->argsl; y++)
+				printf("/%s", g->ops[x]->args[y]->s);
+
+			printf("\n");
+		}
+
+		// execute the operator
 		fatal(g->ops[x]->op->op_exec, g->ops[x], *ls, &ovec, &ovec_len);
 	}
 
+	if(x && (g->ops[x-1]->op->optype & LWOP_SELECTION_WRITE))
+		fatal(yoper.op->op_exec, &yoper, *ls, &ovec, &ovec_len);
+
+	fatal(lstack_last_clear, *ls);
+
+	if(dump)
+		lstack_dump(*ls);
+
 	free(ovec);
 	return 1;
+}
+
+//
+// API
+//
+
+int API lstack_exec_internal(generator* g, char** init, int* initls, int initl, lstack** ls, int dump)
+{
+	return exec_internal(g, init, initls, initl, ls, dump);
+}
+
+int API lstack_exec(generator* g, char** init, int* initls, int initl, lstack** ls)
+{
+	return lstack_exec_internal(g, init, initls, initl, ls, 0);
 }
 
 void API lstack_free(lstack* ls)
@@ -201,19 +262,33 @@ void API lstack_dump(lstack* ls)
 		for(y = 0; y < ls->s[x].l; y++)
 		{
 			int sel = 0;
+			int last = 0;
 			if(x == 0)
 			{
-				if(ls->sel.sl > (x/8))
+				sel = 1;
+				if(!ls->sel.all)
 				{
-					if(ls->sel.s[y/8] & (0x01 << (y%8)))
-						sel++;
+					if(ls->sel.sl <= (y/8))
+						sel = 0;
+					else
+					{
+						if((ls->sel.s[y/8] & (0x01 << (y%8))) == 0)
+							sel = 0;
+					}
+				}
+
+				if(ls->last.sl > (y/8))
+				{
+					if(ls->last.s[y/8] & (0x01 << (y%8)))
+						last = 1;
 				}
 			}
 
-			printf("[%4d,%4d]%s'%.*s'\n"
+			printf("[%4d,%4d] %s%s '%.*s'\n"
 				, x
 				, y
-				, sel ? " >< " : "    "
+				, sel ? ">" : " "
+				, last ? ">" : " "
 				, ls->s[x].s[y].l
 				, ls->s[x].s[y].s
 			);

@@ -28,7 +28,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_SELECTION_READ | LWOP_OPERATION_INPLACE | LWOP_OPERATION_FILESYSTEM
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	rp - "
@@ -47,7 +47,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	for(x = 0; x < ls->s[0].l; x++)
 	{
 		int go = 1;
-		if(ls->sel.l)
+		if(!ls->sel.all)
 		{
 			if(ls->sel.sl <= (x/8))	// could not be selected
 				break;
@@ -66,10 +66,11 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 					, ss
 					, strlen(ss)
 				);
+				fatal(lstack_last_set, ls, x);
 			}
 			else
 			{
-				printf("[%d][%s]\n", errno, strerror(errno));
+				dprintf(listwise_err_fd, "realpath('%s')=[%d][%s]\n", ls->s[0].s[x].s, errno, strerror(errno));
 			}
 		}
 	}

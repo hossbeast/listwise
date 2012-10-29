@@ -27,13 +27,23 @@ typedef struct lstack
 	int			l;	// len - number of lists
 	int			a;	// alloc
 
-	struct 	// selection
+	struct					// items affected by the last operation - on the top list
 	{
-		uint8_t *	s;	// bitvector of selected positions
-		int				l;	// number of selected items
-
+		uint8_t *	s;	// bitvector
+		int				l;	// number of bits set in s
 		int				sl;	// length of s
 		int				sa;	// allocated size of s
+	} last;
+
+	struct 						// currently selected items - on the top list
+	{
+		uint8_t *	s;		// bitvector
+		int				l;		// number of bits set in s
+		int				sl;		// length of s
+		int				sa;		// allocated size of s
+
+		char			all;	// if true, all items are selected - otherwise, exactly those items
+										// as specified in s comprise the current selection
 	} sel;
 } lstack;
 

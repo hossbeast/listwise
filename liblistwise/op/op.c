@@ -31,7 +31,9 @@ int op_load(char* path)
 	if((sym = dlopen(path, RTLD_NOW | RTLD_GLOBAL)) == 0)
 	{
 		fprintf(stderr, "FAILED TO LOAD: %s [%s]\n", path, dlerror());
+/* I guess this segfaults ...
 		dlclose(sym);
+*/
 	}
 	else if((op = dlsym(sym, "op_desc")) == 0)
 	{

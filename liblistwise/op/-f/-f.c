@@ -31,7 +31,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE | LWOP_OPERATION_FILESYSTEM
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	-f - "
@@ -44,16 +44,11 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	// enough room to select all elements
-	int newsl = (ls->s[0].l / 8) + 1;
-	uint8_t * news = alloca(newsl);
-	memset(news, 0, newsl);
-
 	int x;
 	for(x = 0; x < ls->s[0].l; x++)
 	{
 		int go = 1;
-		if(ls->sel.l)
+		if(!ls->sel.all)
 		{
 			if(ls->sel.sl <= (x/8))	// could not be selected
 				break;
@@ -67,7 +62,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			if(stat(ls->s[0].s[x].s, &st) == 0)
 			{
 				if(S_ISREG(st.st_mode))
-					news[x/8] |= (0x01 << (x%8));
+					fatal(lstack_last_set, ls, x);
 			}
 			else
 			{
@@ -75,8 +70,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			}
 		}
 	}
-
-	fatal(lstack_sel_write, ls, news, newsl);
 
 	return 1;
 }

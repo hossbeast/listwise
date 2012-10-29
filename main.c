@@ -110,34 +110,20 @@ int main(int argc, char** argv)
 		if(g_args.dump)
 			lstack_dump(ls);
 
-		// execute operators
-		for(x = 0; x < g->opsl; x++)
-		{
-			if(g_args.dump)
-			{
-				printf(" >> %s", g->ops[x]->op->s);
+		// execute 
 
-				int y;
-				for(y = 0; y < g->ops[x]->argsl; y++)
-					printf("/%s", g->ops[x]->args[y]->s);
+// not part of the actual API
+extern int lstack_exec_internal(generator* g, char** init, int* initls, int initl, lstack** ls, int dump);
 
-				printf("\n");
-			}
-
-			if(g->ops[x]->op->op_exec(g->ops[x], ls, &ovec, &ovec_len) == 0)
-				FAIL("operator exec failed");
-
-			if(g_args.dump)
-				lstack_dump(ls);
-		}
+		if(lstack_exec_internal(g, 0, 0, 0, &ls, g_args.dump) == 0)
+			FAIL("lstack_exec failed");
 
 		// OUTPUT
-
 		int i = 0;
 		for(x = 0; x < ls->s[0].l; x++)
 		{
 			int go = 1;
-			if(ls->sel.l)
+			if(!ls->sel.all)
 			{
 				if(ls->sel.sl <= (x/8))
 					break;

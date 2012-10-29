@@ -25,7 +25,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_SELECTION_RESET
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "	z - "
@@ -38,5 +38,5 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	lstack_sel_clear(ls);
+	lstack_sel_none(ls);
 }

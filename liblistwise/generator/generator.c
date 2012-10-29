@@ -47,6 +47,15 @@ int API generator_parse(generator_parser* p, char* s, int l, generator** g)
 	int x;
 	for(x = 0; x < (*g)->opsl; x++)
 	{
+		if(((*g)->ops[x]->op->optype & LWOP_ARGS_CANHAVE) == 0)
+		{
+			if((*g)->ops[x]->argsl)
+			{
+				printf("%s - arguments not expected", (*g)->ops[x]->op->s);
+				return 0;
+			}
+		}
+
 		if((*g)->ops[x]->op->op_validate((*g)->ops[x]) == 0)
 			return 0;
 	}

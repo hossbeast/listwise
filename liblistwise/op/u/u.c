@@ -21,7 +21,7 @@ NO ARGUMENTS
 
 OPERATION
 
- 1. select entries which are unique
+ 1. select entries which are stringwise NEQ to the preceeding entry
 
 */
 
@@ -29,10 +29,10 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .type					= OPTYPE_GENERAL
+	  .optype					= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	ss - "
+	, .desc					= "	u - "
 };
 
 int op_validate(operation* o)
@@ -42,20 +42,27 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	int l = 0;
-
-	if(ls->sel.l)
+	int p = -1;
+	int x;
+	for(x = 0; x < ls->s[0].l; x++)
 	{
-	}
-	else
-	{
-		int x;
-		for(x = 0; x < ls->s[0].l; x++)
+		int go = 1;
+		if(!ls->sel.all)
 		{
-			if(x == 0 || strcmp(ls->s[0].s[x-1].s, ls->s[0].s[x].s))
+			if(ls->sel.sl <= (x/8))	// could not be selected
+				break;
+
+			go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
+		}
+
+		if(go)
+		{
+			if(p == -1 || strcmp(ls->s[0].s[p].s, ls->s[0].s[x].s))
 			{
-				fatal(lstack_sel_set, ls, x);
+				fatal(lstack_last_set, ls, x);
 			}
+
+			p = x;
 		}
 	}
 
