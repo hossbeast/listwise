@@ -28,7 +28,7 @@ operator op_desc = {
 	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	v - "
+	, .desc					= "invert selection"
 };
 
 int op_validate(operation* o)

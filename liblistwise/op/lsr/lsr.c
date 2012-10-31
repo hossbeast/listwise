@@ -12,7 +12,7 @@
 
 /*
 
-ls operator - directory listing
+lsr operator - recursive directory listing
 
 ARGUMENTS
 
@@ -25,9 +25,10 @@ OPERATION
  1. push an empty list onto the stack
 
  2. for each argument
-      argument is the path to a directory
-      for each item in the the directory listing
-        append path to the item (relative to the argument given)
+      2.1 if argument is the path to a directory
+          2.2 for each item in the the directory listing
+              2.3 append path to the item (relative to the argument given)
+							2.4 repeat 2.2 for this item
 
 */
 
@@ -38,7 +39,7 @@ operator op_desc = {
 	  .optype					= LWOP_SELECTION_READ | LWOP_SELECTION_RESET | LWOP_ARGS_CANHAVE | LWOP_OPERATION_PUSHBEFORE | LWOP_OPERATION_FILESYSTEM
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "create new list from directory listing(s)"
+	, .desc					= "create new list from recursive directory listing(s)"
 };
 
 int op_validate(operation* o)
@@ -46,11 +47,15 @@ int op_validate(operation* o)
 	return 1;
 }
 
-static int listing(lstack* ls, char * s)
+static int listing(lstack* ls, char * s, int l)
 {
 	DIR * dd = 0;
 
-	if((dd = opendir(s)))
+	char tmp[l + 1];
+	memcpy(tmp, s, l);
+	tmp[l] = 0;
+
+	if((dd = opendir(tmp)))
 	{
 		struct dirent ent;
 		struct dirent * entp = 0;
@@ -62,7 +67,10 @@ static int listing(lstack* ls, char * s)
 				if(entp)
 				{
 					if(strcmp(entp->d_name, ".") && strcmp(entp->d_name, ".."))
-						fatal(lstack_addf, ls, "%s/%s", s, entp->d_name);
+					{
+						fatal(lstack_addf, ls, "%.*s/%s", l, s, entp->d_name);
+						fatal(listing, ls, ls->s[0].s[ls->s[0].l - 1].s, ls->s[0].s[ls->s[0].l - 1].l);
+					}
 				}
 				else
 				{
@@ -75,9 +83,9 @@ static int listing(lstack* ls, char * s)
 			}
 		}
 	}
-	else
+	else if(errno != ENOTDIR)
 	{
-		dprintf(listwise_err_fd, "opendir('%s')=[%d][%s]\n", s, errno, strerror(errno));
+		dprintf(listwise_err_fd, "opendir('%.*s')=[%d][%s]\n", l, s, errno, strerror(errno));
 	}
 
 	closedir(dd);
@@ -92,7 +100,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	if(o->argsl)
 	{
 		for(x = 0; x < o->argsl; x++)
-			fatal(listing, ls, o->args[x]->s);
+			fatal(listing, ls, o->args[x]->s, o->args[x]->l);
 	}
 	else
 	{
@@ -108,7 +116,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			}
 
 			if(go)
-				fatal(listing, ls, ls->s[1].s[x].s);
+				fatal(listing, ls, ls->s[1].s[x].s, ls->s[1].s[x].l);
 		}
 	}
 

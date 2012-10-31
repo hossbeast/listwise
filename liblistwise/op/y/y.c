@@ -26,7 +26,7 @@ operator op_desc = {
 	  .optype				= LWOP_SELECTION_RESET
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	y - "
+	, .desc					= "select entries affected by preceeding operator"
 };
 
 int op_validate(operation* o)

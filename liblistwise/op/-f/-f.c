@@ -34,7 +34,7 @@ operator op_desc = {
 	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE | LWOP_OPERATION_FILESYSTEM
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	-f - "
+	, .desc					= "select regular files"
 };
 
 int op_validate(operation* o)

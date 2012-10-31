@@ -26,7 +26,7 @@ operator op_desc = {
 	  .optype					= LWOP_SELECTION_READ
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	sn - "
+	, .desc					= "sort numeric"
 };
 
 int op_validate(operation* o)

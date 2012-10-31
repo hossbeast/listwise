@@ -56,8 +56,11 @@ int API generator_parse(generator_parser* p, char* s, int l, generator** g)
 			}
 		}
 
-		if((*g)->ops[x]->op->op_validate((*g)->ops[x]) == 0)
-			return 0;
+		if((*g)->ops[x]->op->op_validate)
+		{
+			if((*g)->ops[x]->op->op_validate((*g)->ops[x]) == 0)
+				return 0;
+		}
 	}
 
 	return pp.r;

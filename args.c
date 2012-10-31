@@ -18,7 +18,7 @@ static void usage(int help)
 	printf(
 		"listwise : list-centric computation utility\n"
 		"\n"
-		"Usage : lw [options]\n"
+		"Usage : lw [options] generator-string\n"
 		"  --help|-h for this message\n"
 		"\n"
 		"------------------[options]----------------------------------------\n"
@@ -30,15 +30,37 @@ static void usage(int help)
 		"\n"
 		"------------------[operators]--------------------------------------\n"
 		"\n"
+		" 1  2  3  4  5  6  7  8     name  description\n"
 	);
 
 	int x;
 	for(x = 0; x < g_ops_l; x++)
 	{
-		printf("%6s - %s\n", g_ops[x]->s, g_ops[x]->desc);
+		printf("[%c][%c][%c][%c][%c][%c][%c][%c] %6s - %s\n"
+			, g_ops[x]->optype & LWOP_SELECTION_READ				? 'x' : ' '
+			, g_ops[x]->optype & LWOP_SELECTION_WRITE				? 'x' : ' '
+			, g_ops[x]->optype & LWOP_SELECTION_RESET				? 'x' : ' '
+			, g_ops[x]->optype & LWOP_MODIFIERS_CANHAVE			? 'x' : ' '
+			, g_ops[x]->optype & LWOP_ARGS_CANHAVE					? 'x' : ' '
+			, g_ops[x]->optype & LWOP_OPERATION_PUSHBEFORE	? 'x' : ' '
+			, g_ops[x]->optype & LWOP_OPERATION_INPLACE			? 'x' : ' '
+			, g_ops[x]->optype & LWOP_OPERATION_FILESYSTEM	? 'x' : ' '
+			, g_ops[x]->s
+			, g_ops[x]->desc
+		);
 	}
 
-	printf("\n");
+	printf(
+		" 1. SELECTION_READ\n"
+		" 2. SELECTION_WRITE\n"
+		" 3. SELECTION_RESET\n"
+		" 4. MODIFIERS_CANHAVE\n"
+		" 5. ARGS_CANHAVE\n"
+		" 6. OPERATION_PUSHBEFORE\n"
+		" 7. OPERATION_INPLACE\n"
+		" 8. OPERATION_FILESYSTEM\n"
+	);
+
 	exit(!help);
 }
 

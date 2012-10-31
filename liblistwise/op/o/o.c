@@ -29,7 +29,7 @@ operator op_desc = {
 	  .optype				= 0
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	o - "
+	, .desc					= "OR : aggregate selections across operators"
 };
 
 int op_validate(operation* o)

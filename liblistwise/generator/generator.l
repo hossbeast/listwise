@@ -31,8 +31,8 @@
 %%
 
 \\[/]						{
-									yylval->str.s = strdup("/");
-									yylval->str.l = 1;
+									yylval->str.s = strdup(yytext+1);
+									yylval->str.l = yyleng-1;
 									return LEX(STR);
 								}
 [/]							{ return LEX(yytext[0]); }
@@ -41,6 +41,11 @@
 									yylval->bref.l = yyleng;
 									sscanf(yytext + 1, "%d", &yylval->bref.v);
 									return LEX(BREF);
+								}
+\\[^0-9\\/][^\\/]*				{
+									yylval->str.s = strdup(yytext+1);
+									yylval->str.l = yyleng-1;
+									return LEX(STR);
 								}
 -?[0-9]+				{
 									yylval->i64.s = strdup(yytext);

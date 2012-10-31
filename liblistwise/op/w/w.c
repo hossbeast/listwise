@@ -16,8 +16,6 @@ ARGUMENTS
 		    default : 0
 	*2  - length of window
 		    default : 0 - entire string
-	*3  - modifiers
-				y - replace the current selection with those items affected by w
 
 OPERATION
 
@@ -31,10 +29,10 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .optype					= LWOP_SELECTION_READ | LWOP_ARGS_CANHAVE | LWOP_OPERATION_INPLACE
+	  .optype				= LWOP_SELECTION_READ | LWOP_ARGS_CANHAVE | LWOP_OPERATION_INPLACE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	w - "
+	, .desc					= "replace entries with a window on their contents"
 };
 
 int op_validate(operation* o)

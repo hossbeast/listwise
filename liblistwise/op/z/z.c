@@ -28,7 +28,7 @@ operator op_desc = {
 	  .optype					= LWOP_SELECTION_RESET
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	z - "
+	, .desc					= "select none"
 };
 
 int op_validate(operation* o)

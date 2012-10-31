@@ -32,7 +32,7 @@ operator op_desc = {
 	  .optype					= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	u - "
+	, .desc					= "select unique"
 };
 
 int op_validate(operation* o)

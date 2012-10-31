@@ -22,7 +22,7 @@ operator op_desc = {
 	  .optype					= LWOP_SELECTION_READ
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	r - "
+	, .desc					= "reverse selected items"
 };
 
 int op_validate(operation* o)

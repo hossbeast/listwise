@@ -29,7 +29,7 @@ operator op_desc = {
 	  .optype					= LWOP_SELECTION_RESET | LWOP_ARGS_CANHAVE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	x - "
+	, .desc					= "exchange lists"
 };
 
 int op_validate(operation* o)
@@ -62,5 +62,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		ls->s[to] = T;
 	}
 
-	fatal(lstack_sel_none, ls);
+	fatal(lstack_sel_all, ls);
 }

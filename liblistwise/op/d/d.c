@@ -27,7 +27,7 @@ operator op_desc = {
 	  .optype					= LWOP_SELECTION_RESET
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	d - "
+	, .desc					= "extract selected items into a new list"
 };
 
 int op_validate(operation* o)
@@ -72,5 +72,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		ls->s[1] = T;
 	}
 
-	fatal(lstack_sel_none, ls);
+	fatal(lstack_sel_all, ls);
 }

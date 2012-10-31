@@ -31,7 +31,7 @@ operator op_desc = {
 	  .optype				= LWOP_SELECTION_READ | LWOP_MODIFIERS_CANHAVE | LWOP_ARGS_CANHAVE | LWOP_OPERATION_INPLACE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	s - "
+	, .desc					= "substitution by regex"
 };
 
 int op_validate(operation* o)

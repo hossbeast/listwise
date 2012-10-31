@@ -29,7 +29,7 @@ operator op_desc = {
 	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE | LWOP_MODIFIERS_CANHAVE | LWOP_ARGS_CANHAVE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
-	, .desc					= "	m - "
+	, .desc					= "select entries by regex"
 };
 
 int op_validate(operation* o)
