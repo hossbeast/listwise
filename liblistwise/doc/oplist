@@ -44,3 +44,6 @@ lsr     directory LiSting (Recursive)
 
 /*    aggregate math operations    */
 /* sum/avg/stddev - push, write 1 entry with results */
+
+/* select previous  - all rows up to and including the last selected row */
+/* select following - all rows including and following the last selected row */
