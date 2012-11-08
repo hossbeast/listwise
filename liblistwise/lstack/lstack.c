@@ -54,7 +54,7 @@ static int ensure(lstack * const restrict ls, int x, int y, int z)
 			if(ls->s[x].l <= y)
 				ls->s[x].l = y + 1;
 
-			if(z >= 0)
+			if(z > 0)
 			{
 				// ensure string has enough space
 				if(ls->s[x].s[y].a <= z)
@@ -220,6 +220,7 @@ void API lstack_free(lstack* ls)
 
 		free(ls->s);
 		free(ls->sel.s);
+		free(ls->last.s);
 	}
 
 	free(ls);
@@ -258,6 +259,11 @@ void API lstack_dump(lstack* ls)
 	{
 		if(x != ls->l - 1)
 			printf("\n");
+
+		if(ls->s[x].l == 0)
+		{
+			printf("[%4d     ] -- empty \n", x);
+		}
 
 		for(y = 0; y < ls->s[x].l; y++)
 		{
@@ -346,7 +352,7 @@ int API lstack_addf(lstack* const restrict ls, const char* const restrict fmt, .
 	return vwritestack(ls, 0, ls->l ? ls->s[0].l : 0, fmt, va);
 }
 
-int API lstack_push(lstack* const restrict ls)
+int API lstack_unshift(lstack* const restrict ls)
 {
 	// ensure stack has enough lists
 	fatal(ensure, ls, ls->l, -1, -1);
@@ -364,6 +370,17 @@ int API lstack_push(lstack* const restrict ls)
 	ls->s[0].a = 0;
 
 	return 1;
+}
+
+int API lstack_push(lstack* const restrict ls)
+{
+	// allocate new spot
+	fatal(ensure, ls, ls->l, -1, -1);
+
+	// allocate new list at the end
+	fatal(xmalloc, &ls->s[ls->l - 1].s, sizeof(ls->s[0].s[0]));
+	ls->s[ls->l - 1].l = 0;
+	ls->s[ls->l - 1].a = 0;
 }
 
 int API lstack_cycle(lstack* const restrict ls)
@@ -412,4 +429,22 @@ int API lstack_merge(lstack* const restrict ls, int to, int from)
 int API lstack_ensure(lstack * const restrict ls, int x, int y, int z)
 {
 	return ensure(ls, x, y, z);
+}
+
+int API lstack_move(lstack * const restrict ls, int ax, int ay, int bx, int by)
+{
+	fatal(lstack_ensure, ls, ax, ay, 0);
+
+	// copy
+	ls->s[ax].s[ay] = ls->s[bx].s[by];
+
+	// delete
+	memmove(
+	    &ls->s[bx].s[by]
+		, &ls->s[bx].s[by+1]
+		, (ls->s[bx].l - by - 1) * sizeof(ls->s[0].s[0])
+	);
+
+	ls->s[bx].l--;
+	ls->s[bx].a--;
 }

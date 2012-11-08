@@ -37,9 +37,15 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	fatal(lstack_push, ls);
+	fatal(lstack_unshift, ls);
 
 	if(ls->sel.all || ls->sel.l == ls->s[1].l)
+	{
+		typeof(ls->s[0]) T = ls->s[0];
+		ls->s[0] = ls->s[1];
+		ls->s[1] = T;
+	}
+	else
 	{
 		fatal(lstack_ensure, ls, 0, ls->s[1].l - ls->sel.l - 1, -1);
 
@@ -64,12 +70,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		ls->s[1].l -= i;
 		ls->s[1].a -= i;
-	}
-	else
-	{
-		typeof(ls->s[0]) T = ls->s[0];
-		ls->s[0] = ls->s[1];
-		ls->s[1] = T;
 	}
 
 	fatal(lstack_sel_all, ls);

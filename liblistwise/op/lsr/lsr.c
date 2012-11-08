@@ -95,7 +95,7 @@ static int listing(lstack* ls, char * s, int l)
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
 	int x;
-	fatal(lstack_push, ls);
+	fatal(lstack_unshift, ls);
 
 	if(o->argsl)
 	{

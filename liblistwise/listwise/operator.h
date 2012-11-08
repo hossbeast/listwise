@@ -160,9 +160,16 @@ int lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
 
 /// lstack_push
 //
-// push an empty list onto the stack
+// push an empty list onto the end of the stack
 //
 int lstack_push(lstack* const restrict ls)
+	__attribute__((nonnull));
+
+/// lstack_unshift
+//
+// unshift an empty list onto the stack at index zero - all other lists are shifted up
+//
+int lstack_unshift(lstack* const restrict ls)
 	__attribute__((nonnull));
 
 /// lstack_cycle
@@ -184,6 +191,34 @@ int lstack_recycle(lstack* const restrict ls)
 // exchange the first and second lists on the stack
 //
 int lstack_xchg(lstack* const restrict ls)
+	__attribute__((nonnull));
+
+/// lstack_merge
+//
+//
+//
+int lstack_merge(lstack* const restrict ls, int a, int b)
+	__attribute__((nonnull));
+
+/// ensure
+//
+// ensure stack/list allocation up to the specified dimensions
+//
+// parameters
+//   x - zero based list index       ( or -1 to skip stack allocation)
+//   y - zero based string index     ( or -1 to skip list allocation)
+//   z - zero based character index  ( or -1 to skip string allocation)
+//
+// updates stack and list length to be at least the dimension specified
+//  ** this is NOT done for string length **
+//
+int lstack_ensure(lstack* const restrict ls, int x, int y, int z);
+
+/// lstack_move
+//
+// move entry at bx:by to ax:ay, decrease length of bx by one
+//
+int lstack_move(lstack* const restrict ls, int ax, int ay, int bx, int by)
 	__attribute__((nonnull));
 
 /// sel_clear
@@ -211,20 +246,6 @@ int lstack_sel_set(lstack* const restrict ls, int y)
 //
 int lstack_sel_write(lstack* const restrict ls, uint8_t * news, int newsl)
 	__attribute__((nonnull));
-
-/// ensure
-//
-// ensure stack/list allocation up to the specified dimensions
-//
-// parameters
-//   x - zero based list index       ( or -1 to skip stack allocation)
-//   y - zero based string index     ( or -1 to skip list allocation)
-//   z - zero based character index  ( or -1 to skip string allocation)
-//
-// updates stack and list length to be at least the dimension specified
-//  ** this is NOT done for string length **
-//
-int lstack_ensure(lstack* const restrict ls, int x, int y, int z);
 
 /// re_compile
 //
