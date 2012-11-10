@@ -352,6 +352,12 @@ int API lstack_addf(lstack* const restrict ls, const char* const restrict fmt, .
 	return vwritestack(ls, 0, ls->l ? ls->s[0].l : 0, fmt, va);
 }
 
+int API lstack_shift(lstack* const restrict ls)
+{
+	if(ls->l)
+		ls->l--;
+}
+
 int API lstack_unshift(lstack* const restrict ls)
 {
 	// ensure stack has enough lists
@@ -370,6 +376,21 @@ int API lstack_unshift(lstack* const restrict ls)
 	ls->s[0].a = 0;
 
 	return 1;
+}
+
+int API lstack_pop(lstack* const restrict ls)
+{
+	if(ls->l)
+	{
+		memmove(
+			  &ls->s[0]
+			, &ls->s[1]
+			, (ls->l - 1) * sizeof(ls->s[0])
+		);
+
+		ls->l--;
+		ls->a--;
+	}
 }
 
 int API lstack_push(lstack* const restrict ls)

@@ -158,11 +158,11 @@ int lstack_add(lstack* const restrict ls, const char* const restrict s, int l)
 int lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
 	__attribute__((nonnull));
 
-/// lstack_push
+/// lstack_shift
 //
-// push an empty list onto the end of the stack
+// delete the 0th list - all other lists are shifted down
 //
-int lstack_push(lstack* const restrict ls)
+int lstack_shift(lstack* const restrict ls)
 	__attribute__((nonnull));
 
 /// lstack_unshift
@@ -170,6 +170,20 @@ int lstack_push(lstack* const restrict ls)
 // unshift an empty list onto the stack at index zero - all other lists are shifted up
 //
 int lstack_unshift(lstack* const restrict ls)
+	__attribute__((nonnull));
+
+/// lstack_pop
+//
+// delete the Nth list
+//
+int lstack_pop(lstack* const restrict ls)
+	__attribute__((nonnull));
+
+/// lstack_push
+//
+// push an empty list onto the end of the stack
+//
+int lstack_push(lstack* const restrict ls)
 	__attribute__((nonnull));
 
 /// lstack_cycle
