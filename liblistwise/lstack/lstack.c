@@ -382,6 +382,8 @@ int API lstack_pop(lstack* const restrict ls)
 {
 	if(ls->l)
 	{
+		typeof(ls->s[0]) T = ls->s[0];
+
 		memmove(
 			  &ls->s[0]
 			, &ls->s[1]
@@ -389,7 +391,8 @@ int API lstack_pop(lstack* const restrict ls)
 		);
 
 		ls->l--;
-		ls->a--;
+
+		ls->s[ls->l] = T;
 	}
 }
 

@@ -1,6 +1,8 @@
 #ifndef _LISTWISE_LSTACKH
 #define _LISTWISE_LSTACKH
 
+#include <listwise/generator.h>
+
 ///
 /// [[ LSTACK API ]]
 ///
@@ -18,7 +20,7 @@
 				}																									\
 			}
 
-#define LSTACK_LOOP_DONE	}} 
+#define LSTACK_LOOP_DONE	}
 
 /// lstack_exec
 //
