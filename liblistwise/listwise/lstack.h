@@ -8,17 +8,17 @@
 ///
 
 // iterate the selected elements of the 0th list of the lstack
-#define LSTACK_LOOP_ITER(ls, x, go)												\
-		for(x = 0; x < (ls)->s[0].l; x++)											\
-		{																											\
-			int go = 1;																					\
-			if(!(ls)->sel.all)																	\
-			{																										\
-				if((ls)->sel.sl > (x/8))													\
-				{																									\
-					go = ((ls)->sel.s[x/8] & (0x01 << (x%8)));			\
-				}																									\
-			}
+#define LSTACK_LOOP_ITER(ls, x, go)											\
+	for(x = 0; x < (ls)->s[0].l; x++)											\
+	{																											\
+		int go = 1;																					\
+		if(!(ls)->sel.all)																	\
+		{																										\
+			if((ls)->sel.sl > (x/8))													\
+			{																									\
+				go = ((ls)->sel.s[x/8] & (0x01 << (x%8)));			\
+			}																									\
+		}
 
 #define LSTACK_LOOP_DONE	}
 

@@ -75,15 +75,26 @@ static int ensure(lstack * const restrict ls, int x, int y, int z)
 	return 1;
 }
 
-static int writestack(lstack* const restrict ls, int x, int y, const char* const restrict s, int l)
+static int writestack(lstack* const restrict ls, int x, int y, const void* const restrict s, int l, uint8_t type)
 {
-	// ensure stack has enough lists, list has enough strings, string has enough bytes
-	fatal(ensure, ls, x, y, l + 1);
+	if(type)
+	{
+		// ensure stack has enough lists, list has enough strings, string has enough bytes
+		fatal(ensure, ls, x, y, sizeof(s));
 
-	// write and cap the string
-	memcpy(ls->s[x].s[y].s, s, l);
-	ls->s[x].s[y].s[l] = 0;
-	ls->s[x].s[y].l = l;
+		// copy the pointer, set the type
+		memcpy(ls->s[x].s[y].s, (void*)&s, sizeof(s));
+		ls->s[x].s[y].type = type;
+	}
+	else
+	{
+		fatal(ensure, ls, x, y, l + 1);
+
+		// write and cap the string
+		memcpy(ls->s[x].s[y].s, s, l);
+		ls->s[x].s[y].s[l] = 0;
+		ls->s[x].s[y].l = l;
+	}
 
 	return 1;
 }
@@ -126,13 +137,13 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 	int x;
 	for(x = 0; x < initl; x++)
 	{
-		fatal(writestack, *ls, 0, x, init[x], initls[x]);
+		fatal(writestack, *ls, 0, x, init[x], initls[x], 0);
 	}
 
 	// write initial generator args at top of list stack
 	for(x = 0; x < g->argsl; x++)
 	{
-		fatal(writestack, *ls, 0, x + initl, g->args[x]->s, g->args[x]->l);
+		fatal(writestack, *ls, 0, x + initl, g->args[x]->s, g->args[x]->l, 0);
 	}
 
 	// the initial state of the selection is all
@@ -328,7 +339,7 @@ int API lstack_appendf(lstack* const restrict ls, int x, int y, const char* cons
 
 int API lstack_write(lstack* const restrict ls, int x, int y, const char* const restrict s, int l)
 {
-	return writestack(ls, x, y, s, l);
+	return writestack(ls, x, y, s, l, 0);
 }
 
 int API lstack_writef(lstack* const restrict ls, int x, int y, const char* const restrict fmt, ...)
@@ -339,9 +350,14 @@ int API lstack_writef(lstack* const restrict ls, int x, int y, const char* const
 	return vwritestack(ls, x, y, fmt, va);
 }
 
+int API lstack_obj_write(lstack* const restrict ls, int x, int y, const void* const restrict o, uint8_t type)
+{
+	return writestack(ls, x, y, o, 0, type);
+}
+
 int API lstack_add(lstack* const restrict ls, const char* const restrict s, int l)
 {
-	return writestack(ls, 0, ls->l ? ls->s[0].l : 0, s, l);
+	return writestack(ls, 0, ls->l ? ls->s[0].l : 0, s, l, 0);
 }
 
 int API lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
@@ -350,6 +366,11 @@ int API lstack_addf(lstack* const restrict ls, const char* const restrict fmt, .
 	va_start(va, fmt);
 
 	return vwritestack(ls, 0, ls->l ? ls->s[0].l : 0, fmt, va);
+}
+
+int API lstack_obj_add(lstack* const restrict ls, const void* const restrict o, uint8_t type)
+{
+	return writestack(ls, 0, ls->l ? ls->s[0].l : 0, o, 0, type);
 }
 
 int API lstack_shift(lstack* const restrict ls)
