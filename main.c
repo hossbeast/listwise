@@ -13,6 +13,7 @@
 #include <listwise/ops.h>
 #include <listwise/generator.h>
 #include <listwise/lstack.h>
+#include <listwise/object.h>
 
 #include "args.h"
 
@@ -110,40 +111,29 @@ int main(int argc, char** argv)
 		if(g_args.dump)
 			lstack_dump(ls);
 
-		// execute 
-
 // not part of the actual API
 extern int lstack_exec_internal(generator* g, char** init, int* initls, int initl, lstack** ls, int dump);
 
+		// execute 
 		if(lstack_exec_internal(g, 0, 0, 0, &ls, g_args.dump) == 0)
 			FAIL("lstack_exec failed");
 
 		// OUTPUT
 		int i = 0;
-		for(x = 0; x < ls->s[0].l; x++)
+		LSTACK_LOOP_ITER(ls, x, go);
+		if(go)
 		{
-			int go = 1;
-			if(!ls->sel.all)
-			{
-				if(ls->sel.sl <= (x/8))
-					break;
+			if(g_args.number)
+				printf("%3d ", i++);
 
-				go = (ls->sel.s[x/8] & (0x01 << (x%8)));
-			}
+			printf("%s", lstack_string(ls, 0, x));
 
-			if(go)
-			{
-				if(g_args.number)
-					printf("%3d %.*s", i++, ls->s[0].s[x].l, ls->s[0].s[x].s);
-				else
-					printf("%.*s", ls->s[0].s[x].l, ls->s[0].s[x].s);
-
-				if(g_args.out_null)
-					printf("%hhu", 0);
-				else
-					printf("\n");
-			}
+			if(g_args.out_null)
+				printf("%hhu", 0);
+			else
+				printf("\n");
 		}
+		LSTACK_LOOP_DONE;
 	}
 
 	free(ovec);

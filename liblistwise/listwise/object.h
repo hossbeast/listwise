@@ -1,6 +1,8 @@
 #ifndef _LISTWISE_OBJECT_H
 #define _LISTWISE_OBJECT_H
 
+#define restrict __restrict
+
 /* LISTWISE OBJECT API
 **
 **  typically liblistwise manipulates lists of strings. using this api it is possible
@@ -16,8 +18,31 @@
 **
 */
 
-typedef struct
+#include "coll.h"
+#include "idx.h"
+
+// collection of registered object types
+// with lookup index by type id
+extern union object_registry_t
 {
+	coll_doubly c;
+
+	struct
+	{
+		int l;
+		int a;
+		int z;
+
+		struct listwise_object ** e;		// object defs
+
+		idx * by_type;					// indexed by type
+	};
+} object_registry;
+
+typedef struct listwise_object
+{
+	uint8_t type;
+
 	/// string
 	//
 	// SUMMARY
@@ -25,14 +50,15 @@ typedef struct
 	//  this type as a string
 	//
 	// PARAMETERS
-	//  o - pointer to the object
-	//  s - pointer to string returned here
-	//  l - pointer to length returned here
+	//  o      - pointer to the object
+	//  [prop] - name of string property, or null for default
+	//  s      - pointer to string returned here
+	//  l      - length returned here
 	//
 	// RETURNS
 	//  0 on error, 1 otherwise
 	//
-	int (*string)(void * o, char ** s, int * l);
+	int (*string)(void * o, char* prop, char ** s, int * l);
 
 	/// reflect
 	//
@@ -51,7 +77,7 @@ typedef struct
 	// RETURNS
 	//  0 on error, 1 otherwise
 	//
-	int (*reflect)(void * o, char* property, void ** r, uint8_t * rtypes, int * rls, int * rl);
+	int (*reflect)(void * o, char* property, void *** r, uint8_t ** rtypes, int ** rls, int * rl);
 
 	/// destroy
 	//
@@ -77,7 +103,7 @@ typedef struct
 // RETURNS
 //  0 on error (memory, io)
 //
-int listwise_register_object(uint8_t type, listwise_type* def);
+int listwise_register_object(uint8_t type, listwise_object * def);
 
 ///
 /// [[ LSTACK API (for objects) ]]
@@ -96,5 +122,17 @@ int lstack_obj_write(lstack* const restrict ls, int x, int y, const void* const 
 //
 int lstack_obj_add(lstack* const restrict ls, const void* const restrict o, uint8_t type)
 	__attribute__((nonnull));
+
+/// lstack_string
+//
+// get a string for the entry at the specified position
+//
+char* lstack_string(lstack* const restrict ls, int x, int y);
+
+/// lstack_getstring
+//
+// get a string for the entry at the specified position
+//
+char* lstack_getstring(lstack* const restrict ls, int x, int y, char ** r, int * rl);
 
 #endif
