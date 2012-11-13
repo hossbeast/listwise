@@ -14,6 +14,7 @@ L_NAME           =lib${NAME}
 LIB              =${L_NAME}.so
 INCDIR           =/usr/include
 LIBDIR          ?=/usr/lib
+DLIBDIR         ?=/usr/lib
 VER              =0.1
 
 OPLIST					:=$(shell ls -1 op | grep -v 'op\.'| sed -e 's/.*/op\/&\/&.so/')
@@ -113,15 +114,15 @@ install: ${LIB} ${OPLIST}
 	${INSTALL} listwise/lstack.h       ${DESTDIR}/${INCDIR}/listwise/lstack.h
 	${INSTALL} listwise/object.h       ${DESTDIR}/${INCDIR}/listwise/object.h
 	
-	${INSTALL} -d               ${DESTDIR}/${LIBDIR}/listwise
+	${INSTALL} -d               ${DESTDIR}/${DLIBDIR}/listwise
 	for x in ${OPLIST}; do \
-		${INSTALL_PROGRAM} $$x    ${DESTDIR}/${LIBDIR}/listwise/$$(basename $$x); \
+		${INSTALL_PROGRAM} $$x    ${DESTDIR}/${DLIBDIR}/listwise/$$(basename $$x); \
 	done
 
 uninstall:
 	rm -f												${DESTDIR}/${LIBDIR}/${LIB}.${VER}
 	rm -f												${DESTDIR}/${LIBDIR}/${LIB}
-	rm -rf											${DESTDIR}/${LIBDIR}/listwise
+	rm -rf											${DESTDIR}/${DLIBDIR}/listwise
 	rm -f                       ${DESTDIR}/${INCDIR}/listwise.h
 
 clean ::
