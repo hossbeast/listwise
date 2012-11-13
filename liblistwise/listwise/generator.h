@@ -1,6 +1,8 @@
 #ifndef _LISTWISE_GENERATOR_H
 #define _LISTWISE_GENERATOR_H
 
+#include <listwise/operator.h>
+
 /// generator declaration - definition is private
 struct generator_t;
 typedef struct generator_t generator;

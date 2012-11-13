@@ -60,12 +60,9 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	memb = alloca(i * sizeof(memb[0]));
 	memcpy(memb, mema, i * sizeof(memb[0]));
 
-	int compar(const void * _A, const void * _B)
+	int compar(const void * A, const void * B)
 	{
-		typeof(ls->s[0].s[0]) * A = &ls->s[0].s[*(int*)_A];
-		typeof(ls->s[0].s[0]) * B = &ls->s[0].s[*(int*)_B];
-
-		return strcmp(A->s, B->s);
+		return strcmp(lstack_string(ls, 0, *(int*)A), lstack_string(ls, 0, *(int*)B));
 	}
 
 	qsort(mema, i, sizeof(mema[0]), compar);

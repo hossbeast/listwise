@@ -66,4 +66,5 @@ void __attribute__((constructor)) list_initialize()
 void __attribute__((destructor)) list_teardown()
 {
 	op_teardown();
+	object_teardown();
 }

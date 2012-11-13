@@ -68,7 +68,11 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(go)
 		{
-			fatal(re_exec, &o->args[0]->re, ls->s[0].s[x].s, ls->s[0].s[x].l, 0, ovec, ovec_len);
+			char * s = 0;
+			int l = 0;
+			lstack_getstring(ls, 0, x, &s, &l);
+
+			fatal(re_exec, &o->args[0]->re, s, l, 0, ovec, ovec_len);
 
 			if((*ovec)[0] > 0)
 				fatal(lstack_last_set, ls, x);

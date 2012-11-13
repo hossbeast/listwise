@@ -14,10 +14,12 @@ typedef struct lstack
 	{
 		struct // list
 		{
-			char*		s;	// string
+			char*		s;		// string
 
-			int			l;	// len - number of characters
-			int			a;	// alloc
+			int			l;		// len - number of characters
+			int			a;		// alloc
+
+			uint8_t	type;	// object type - ignore unless using the list-object interface
 		}					*s;
 
 		int			l;	// len - number of strings

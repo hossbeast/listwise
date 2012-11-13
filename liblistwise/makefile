@@ -92,6 +92,8 @@ lstack.o : common/xmem.o
 re.o : common/xmem.o
 op.o : common/xmem.o
 
+object.o : common/idx.o
+
 #
 # phony targets
 #
@@ -109,6 +111,7 @@ install: ${LIB} ${OPLIST}
 	${INSTALL} listwise/generator.h    ${DESTDIR}/${INCDIR}/listwise/generator.h
 	${INSTALL} listwise/ops.h          ${DESTDIR}/${INCDIR}/listwise/ops.h
 	${INSTALL} listwise/lstack.h       ${DESTDIR}/${INCDIR}/listwise/lstack.h
+	${INSTALL} listwise/object.h       ${DESTDIR}/${INCDIR}/listwise/object.h
 	
 	${INSTALL} -d               ${DESTDIR}/${LIBDIR}/listwise
 	for x in ${OPLIST}; do \

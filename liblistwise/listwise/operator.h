@@ -32,6 +32,7 @@ enum
 	, LWOP_OPERATION_PUSHBEFORE		= 0x0020			// first operation is to push an empty list
 	, LWOP_OPERATION_INPLACE			= 0x0040			// modifies the string in the top list in-place
 	, LWOP_OPERATION_FILESYSTEM		= 0x0080			// filesystem operator
+	, LWOP_OBJECT_NO							= 0x0100			// operator ignores object entries
 };
 
 //
@@ -158,11 +159,11 @@ int lstack_add(lstack* const restrict ls, const char* const restrict s, int l)
 int lstack_addf(lstack* const restrict ls, const char* const restrict fmt, ...)
 	__attribute__((nonnull));
 
-/// lstack_push
+/// lstack_shift
 //
-// push an empty list onto the end of the stack
+// delete the 0th list - all other lists are shifted down
 //
-int lstack_push(lstack* const restrict ls)
+int lstack_shift(lstack* const restrict ls)
 	__attribute__((nonnull));
 
 /// lstack_unshift
@@ -170,6 +171,20 @@ int lstack_push(lstack* const restrict ls)
 // unshift an empty list onto the stack at index zero - all other lists are shifted up
 //
 int lstack_unshift(lstack* const restrict ls)
+	__attribute__((nonnull));
+
+/// lstack_pop
+//
+// delete the Nth list
+//
+int lstack_pop(lstack* const restrict ls)
+	__attribute__((nonnull));
+
+/// lstack_push
+//
+// push an empty list onto the end of the stack
+//
+int lstack_push(lstack* const restrict ls)
 	__attribute__((nonnull));
 
 /// lstack_cycle
@@ -199,6 +214,18 @@ int lstack_xchg(lstack* const restrict ls)
 //
 int lstack_merge(lstack* const restrict ls, int a, int b)
 	__attribute__((nonnull));
+
+/// lstack_string
+//
+// get a string for the entry at the specified position
+//
+char* lstack_string(lstack* const restrict ls, int x, int y);
+
+/// lstack_getstring
+//
+// get a string for the entry at the specified position
+//
+char* lstack_getstring(lstack* const restrict ls, int x, int y, char ** r, int * rl);
 
 /// ensure
 //
