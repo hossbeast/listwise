@@ -17,7 +17,7 @@
 static int init()
 {
 	char space[256];
-	char* dir = "/usr/lib/listwise";
+	char* dir = "/usr/lib64/listwise";
 
 	snprintf(space, sizeof(space), "%s", dir);
 

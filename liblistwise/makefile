@@ -13,7 +13,7 @@ NAME             =listwise
 L_NAME           =lib${NAME}
 LIB              =${L_NAME}.so
 INCDIR           =/usr/include
-LIBDIR          ?=/usr/lib
+LIBDIR          ?=/usr/lib64
 VER              =0.1
 
 OPLIST					:=$(shell ls -1 op | grep -v 'op\.'| sed -e 's/.*/op\/&\/&.so/')

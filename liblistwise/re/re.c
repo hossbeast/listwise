@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <pcre.h>
-
 #include "listwise/internal.h"
 #include "re.h"
 
