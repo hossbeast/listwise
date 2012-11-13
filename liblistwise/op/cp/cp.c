@@ -27,7 +27,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_RESET | LWOP_ARGS_CANHAVE
+	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE | LWOP_ARGS_CANHAVE
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "duplicate list entries"
@@ -98,14 +98,14 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 				// duplicate contents into new entry
 				ls->s[0].s[x+y].s = ls->s[0].s[x].s;
+
+				fatal(lstack_last_set, ls, x + y);
 			}
+			fatal(lstack_last_set, ls, x);
 
 			i += N;
 		}
 	}
-
-	// selection reset
-	fatal(lstack_sel_all, ls);
 
 	return 1;
 }
