@@ -28,7 +28,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .optype					= LWOP_SELECTION_READ | LWOP_OPERATION_INPLACE | LWOP_OPERATION_FILESYSTEM
+	  .optype					= LWOP_SELECTION_READ | LWOP_OPERATION_INPLACE | LWOP_OPERATION_FILESYSTEM | LWOP_OBJECT_NO
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "path canonicalization with realpath"
@@ -55,7 +55,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
 		}
 
-		if(go)
+		if(go && ls->s[0].s[x].type == 0)
 		{
 			if(realpath(ls->s[0].s[x].s, ss))
 			{

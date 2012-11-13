@@ -97,7 +97,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 				memset(&ls->s[0].s[x + y], 0, sizeof(ls->s[0].s[0]));
 
 				// duplicate contents into new entry
-				fatal(lstack_write, ls, 0, x + y, ls->s[0].s[x].s, ls->s[0].s[x].l);
+				ls->s[0].s[x+y].s = ls->s[0].s[x].s;
 			}
 
 			i += N;

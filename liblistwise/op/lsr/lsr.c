@@ -116,7 +116,13 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			}
 
 			if(go)
-				fatal(listing, ls, ls->s[1].s[x].s, ls->s[1].s[x].l);
+			{
+				char * s;
+				int l;
+				lstack_getstring(ls, 1, x, &s, &l);
+
+				fatal(listing, ls, s, l);
+			}
 		}
 	}
 

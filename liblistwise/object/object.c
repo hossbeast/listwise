@@ -41,7 +41,7 @@ charstar API lstack_string(lstack* const restrict ls, int x, int y)
 			char * s = 0;
 			int l = 0;
 
-			o->string(ls->s[x].s[y].s, 0, &s, &l);
+			o->string(*(void**)ls->s[x].s[y].s, o->string_property, &s, &l);
 
 			return s;
 		}
@@ -63,7 +63,7 @@ charstar API lstack_getstring(lstack* const restrict ls, int x, int y, char ** r
 			char * s = 0;
 			int l = 0;
 
-			o->string(ls->s[x].s[y].s, 0, r, rl);
+			o->string(*(void**)ls->s[x].s[y].s, o->string_property, r, rl);
 
 			return s;
 		}
@@ -75,4 +75,27 @@ charstar API lstack_getstring(lstack* const restrict ls, int x, int y, char ** r
 	*rl = ls->s[x].s[y].l;
 
 	return *r;
+}
+
+int API listwise_enumerate_objects(listwise_object *** list, int * list_len)
+{
+	return idx_enumerate(object_registry.by_type, list, list_len);
+}
+
+int API listwise_lookup_object(uint8_t type, listwise_object ** obj)
+{
+	return (int)(intptr_t)((*obj) = idx_lookup_val(object_registry.by_type, &type, 0));
+}
+
+///
+/// [[ LSTACK API (for objects) ]]
+
+
+void object_teardown()
+{
+	int x;
+	for(x = 0; x < object_registry.l; x++)
+		free(object_registry.e[x]->string_property);
+
+	idx_free(object_registry.by_type);
 }

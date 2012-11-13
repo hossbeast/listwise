@@ -32,6 +32,7 @@ enum
 	, LWOP_OPERATION_PUSHBEFORE		= 0x0020			// first operation is to push an empty list
 	, LWOP_OPERATION_INPLACE			= 0x0040			// modifies the string in the top list in-place
 	, LWOP_OPERATION_FILESYSTEM		= 0x0080			// filesystem operator
+	, LWOP_OBJECT_NO							= 0x0100			// operator ignores object entries
 };
 
 //
@@ -213,6 +214,18 @@ int lstack_xchg(lstack* const restrict ls)
 //
 int lstack_merge(lstack* const restrict ls, int a, int b)
 	__attribute__((nonnull));
+
+/// lstack_string
+//
+// get a string for the entry at the specified position
+//
+char* lstack_string(lstack* const restrict ls, int x, int y);
+
+/// lstack_getstring
+//
+// get a string for the entry at the specified position
+//
+char* lstack_getstring(lstack* const restrict ls, int x, int y, char ** r, int * rl);
 
 /// ensure
 //

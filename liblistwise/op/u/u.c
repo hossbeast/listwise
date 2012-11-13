@@ -57,7 +57,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(go)
 		{
-			if(p == -1 || strcmp(ls->s[0].s[p].s, ls->s[0].s[x].s))
+			if(p == -1 || strcmp(lstack_string(ls, 0, p), lstack_string(ls, 0, x)))
 			{
 				fatal(lstack_last_set, ls, x);
 			}

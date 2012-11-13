@@ -24,7 +24,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .optype				= LWOP_SELECTION_READ | LWOP_OPERATION_INPLACE
+	  .optype				= LWOP_SELECTION_READ | LWOP_OPERATION_INPLACE | LWOP_OBJECT_NO
 	, .op_exec			= op_exec
 	, .desc					= "get component of filepath preceeding the filename"
 };
@@ -45,7 +45,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(go)
 		{
-			if(ls->s[0].s[x].l)
+			if(ls->s[0].s[x].type == 0 && ls->s[0].s[x].l)
 			{
 				char * s = ls->s[0].s[x].s;
 				char * e = ls->s[0].s[x].s + ls->s[0].s[x].l - 1;

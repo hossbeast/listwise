@@ -108,7 +108,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			}
 
 			if(go)
-				fatal(listing, ls, ls->s[1].s[x].s);
+				fatal(listing, ls, lstack_string(ls, 1, x));
 		}
 	}
 

@@ -59,14 +59,14 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		if(go)
 		{
 			struct stat st;
-			if(stat(ls->s[0].s[x].s, &st) == 0)
+			if(stat(lstack_string(ls, 0, x), &st) == 0)
 			{
 				if(S_ISLNK(st.st_mode))
 					fatal(lstack_last_set, ls, x);
 			}
 			else
 			{
-				dprintf(listwise_err_fd, "stat('%s')=[%d][%s]\n", ls->s[0].s[x].s, errno, strerror(errno));
+				dprintf(listwise_err_fd, "stat('%s')=[%d][%s]\n", lstack_string(ls, 0, x), errno, strerror(errno));
 			}
 		}
 	}

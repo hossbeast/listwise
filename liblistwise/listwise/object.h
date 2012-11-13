@@ -18,30 +18,16 @@
 **
 */
 
-#include "coll.h"
-#include "idx.h"
-
-// collection of registered object types
-// with lookup index by type id
-extern union object_registry_t
-{
-	coll_doubly c;
-
-	struct
-	{
-		int l;
-		int a;
-		int z;
-
-		struct listwise_object ** e;		// object defs
-
-		idx * by_type;					// indexed by type
-	};
-} object_registry;
-
 typedef struct listwise_object
 {
+	// unique type identifier
 	uint8_t type;
+
+	// active propery for default string coercion on object entries of this type
+	//  default - 0
+	//  see the fx operator
+	//
+	char* string_property;
 
 	/// string
 	//
@@ -105,6 +91,20 @@ typedef struct listwise_object
 //
 int listwise_register_object(uint8_t type, listwise_object * def);
 
+/// listwise_enumerate_objects
+//
+// get a list of registered object definitions
+//
+// *list is deallocated by the caller
+//
+int listwise_enumerate_objects(listwise_object *** list, int * list_len);
+
+/// listwise_lookup_object
+//
+// lookup the object definition associated with the specified type
+//
+int listwise_lookup_object(uint8_t type, listwise_object ** obj);
+
 ///
 /// [[ LSTACK API (for objects) ]]
 ///
@@ -122,17 +122,5 @@ int lstack_obj_write(lstack* const restrict ls, int x, int y, const void* const 
 //
 int lstack_obj_add(lstack* const restrict ls, const void* const restrict o, uint8_t type)
 	__attribute__((nonnull));
-
-/// lstack_string
-//
-// get a string for the entry at the specified position
-//
-char* lstack_string(lstack* const restrict ls, int x, int y);
-
-/// lstack_getstring
-//
-// get a string for the entry at the specified position
-//
-char* lstack_getstring(lstack* const restrict ls, int x, int y, char ** r, int * rl);
 
 #endif

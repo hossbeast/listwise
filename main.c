@@ -124,7 +124,7 @@ extern int lstack_exec_internal(generator* g, char** init, int* initls, int init
 		if(go)
 		{
 			if(g_args.number)
-				printf("%3d ", i++);
+				printf("%d %3d ", x, i++);
 
 			printf("%s", lstack_string(ls, 0, x));
 

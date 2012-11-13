@@ -52,7 +52,8 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		{
 			if(ls->s[0].s[x].type)
 			{
-				listwise_object * def = idx_lookup_val(object_registry.by_type, &ls->s[0].s[x].type, 0);
+				listwise_object * def = 0;
+				fatal(listwise_lookup_object, ls->s[0].s[x].type, &def);
 
 				if(def)
 				{
@@ -61,15 +62,16 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 					int *			rls = 0;
 					int				rl = 0;
 
-					fatal(def->reflect, ls->s[0].s[x].s, prop, &r, &rtypes, &rls, &rl);
+					fatal(def->reflect, *(void**)ls->s[0].s[x].s, prop, &r, &rtypes, &rls, &rl);
 
 					// make room
+					int l = ls->s[0].l;
 					fatal(lstack_ensure, ls, 0, x + rl - 1, sizeof(void*));
 
 					memmove(
 						  &ls->s[0].s[x + rl]
 						, &ls->s[0].s[x + 1]
-						, (ls->s[0].l - x - 1) * sizeof(ls->s[0].s[0])
+						, (l - x - 1) * sizeof(ls->s[0].s[0])
 					);
 
 					int i;

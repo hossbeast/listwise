@@ -30,13 +30,13 @@ static void usage(int help)
 		"\n"
 		"------------------[operators]--------------------------------------\n"
 		"\n"
-		" 1  2  3  4  5  6  7  8     name  description\n"
+		" 1  2  3  4  5  6  7  8  9    name  description\n"
 	);
 
 	int x;
 	for(x = 0; x < g_ops_l; x++)
 	{
-		printf("[%c][%c][%c][%c][%c][%c][%c][%c] %6s - %s\n"
+		printf("[%c][%c][%c][%c][%c][%c][%c][%c][%c] %6s - %s\n"
 			, g_ops[x]->optype & LWOP_SELECTION_READ				? 'x' : ' '
 			, g_ops[x]->optype & LWOP_SELECTION_WRITE				? 'x' : ' '
 			, g_ops[x]->optype & LWOP_SELECTION_RESET				? 'x' : ' '
@@ -45,6 +45,7 @@ static void usage(int help)
 			, g_ops[x]->optype & LWOP_OPERATION_PUSHBEFORE	? 'x' : ' '
 			, g_ops[x]->optype & LWOP_OPERATION_INPLACE			? 'x' : ' '
 			, g_ops[x]->optype & LWOP_OPERATION_FILESYSTEM	? 'x' : ' '
+			, g_ops[x]->optype & LWOP_OBJECT_NO							? 'x' : ' '
 			, g_ops[x]->s
 			, g_ops[x]->desc
 		);
@@ -59,6 +60,7 @@ static void usage(int help)
 		" 6. OPERATION_PUSHBEFORE\n"
 		" 7. OPERATION_INPLACE\n"
 		" 8. OPERATION_FILESYSTEM\n"
+		" 9. OBJECT_NO\n"
 	);
 
 	exit(!help);

@@ -28,7 +28,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .optype				= LWOP_SELECTION_READ | LWOP_MODIFIERS_CANHAVE | LWOP_ARGS_CANHAVE | LWOP_OPERATION_INPLACE
+	  .optype				= LWOP_SELECTION_READ | LWOP_MODIFIERS_CANHAVE | LWOP_ARGS_CANHAVE | LWOP_OPERATION_INPLACE | LWOP_OBJECT_NO
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "substitution by regex"
@@ -80,7 +80,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			go = (ls->sel.s[x/8] & (0x01 << (x%8)));
 		}
 
-		if(go)
+		if(go && ls->s[0].s[x].type == 0)
 		{
 			// ls->s[0].s[x].s - the string to check and modify
 			fatal(re_exec, &o->args[0]->re, ls->s[0].s[x].s, ls->s[0].s[x].l, 0, ovec, ovec_len);

@@ -212,7 +212,7 @@ int API lstack_exec_internal(generator* g, char** init, int* initls, int initl, 
 
 int API lstack_exec(generator* g, char** init, int* initls, int initl, lstack** ls)
 {
-	return lstack_exec_internal(g, init, initls, initl, ls, 0);
+	return exec_internal(g, init, initls, initl, ls, 0);
 }
 
 void API lstack_free(lstack* ls)
