@@ -44,7 +44,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(go)
 		{
-			if(ls->s[0].s[x].type == 0 && ls->s[0].s[x].l)
+			if(ls->s[0].s[x].l && ls->s[0].s[x].type == 0)
 			{
 				char * o = ls->s[0].s[x].s;
 				char * s = ls->s[0].s[x].s;

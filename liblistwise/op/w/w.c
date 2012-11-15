@@ -59,7 +59,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			go = (ls->sel.s[x/8] & (0x01 << (x%8)));
 		}
 
-		if(go && ls->s[0].s[x].type == 0)
+		if(go && (!ls->s[0].s || ls->s[0].s[x].type == 0))
 		{
 			int off = 0;
 			int len = 0;
@@ -74,7 +74,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			if(len == 0)
 				len = ls->s[0].s[x].l - off;
 
-			if(ls->s[0].s[x].l >= (off + len))
+			if(off < ls->s[0].s[x].l && len > 0)
 			{
 				// copy of the starting string
 				int ssl = ls->s[0].s[x].l;

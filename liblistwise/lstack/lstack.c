@@ -98,7 +98,7 @@ static int writestack(lstack* const restrict ls, int x, int y, const void* const
 	}
 	else
 	{
-		fatal(ensure, ls, x, y, l + 1);
+		fatal(ensure, ls, x, y, l);
 
 		// write and cap the string
 		memcpy(ls->s[x].s[y].s, s, l);

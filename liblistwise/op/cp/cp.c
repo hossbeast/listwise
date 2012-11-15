@@ -4,6 +4,7 @@
 #include <listwise/operator.h>
 
 #include "control.h"
+#include "xmem.h"
 
 /*
 
@@ -75,10 +76,11 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		int go = 1;
 		if(!ls->sel.all)
 		{
-			if(ls->sel.sl <= (x/8))	// could not be selected
-				continue;
-
-			go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
+			go = 0;
+			if(ls->sel.sl > (x/8))	// could not be selected
+			{
+				go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
+			}
 		}
 
 		if(go)
@@ -90,20 +92,57 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 				, ((k - x - 1) + i) * sizeof(ls->s[0].s[0])
 			);
 
+			memmove(
+				  &ls->s[0].t[x + N + 1]
+				, &ls->s[0].t[x + 1]
+				, ((k - x - 1) + i) * sizeof(ls->s[0].t[0])
+			);
+
 			int y;
 			for(y = 1; y <= N; y++)
 			{
-				// ensure these slots are actually reallocated
-				memset(&ls->s[0].s[x + y], 0, sizeof(ls->s[0].s[0]));
-
 				// duplicate contents into new entry
-				ls->s[0].s[x+y].s = ls->s[0].s[x].s;
+				ls->s[0].s[x+y] = ls->s[0].s[x];
+				if(ls->s[0].s[x+y].s)
+				{
+					fatal(xmalloc, &ls->s[0].s[x+y].s, ls->s[0].s[x].l + 1);
+					memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, ls->s[0].s[x].l);
+				}
 
-				fatal(lstack_last_set, ls, x + y);
+				ls->s[0].t[x+y] = ls->s[0].t[x];
+				if(ls->s[0].t[x+y].s)
+				{
+					fatal(xmalloc, &ls->s[0].t[x+y].s, ls->s[0].t[x].l + 1);
+					memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, ls->s[0].s[x].l);
+				}
 			}
-			fatal(lstack_last_set, ls, x);
 
 			i += N;
+		}
+	}
+
+	c = 0;
+	for(x = 0; x < k; x++)
+	{
+		int go = 1;
+		if(!ls->sel.all)
+		{
+			go = 0;
+			if(ls->sel.sl > (x/8))	// could not be selected
+			{
+				go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
+			}
+		}
+
+		if(go)
+		{
+			int y;
+			for(y = 0; y <= N; y++)
+			{
+				fatal(lstack_last_set, ls, x + y + c);
+			}
+
+			c += N;
 		}
 	}
 

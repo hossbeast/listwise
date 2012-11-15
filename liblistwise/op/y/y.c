@@ -44,6 +44,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	{
 		if(ls->sel.sa < ls->last.sl)
 		{
+			free(ls->sel.s);
 			if((ls->sel.s = calloc(1, ls->last.sl * sizeof(*ls->sel.s))) == 0)
 				return 0;
 
