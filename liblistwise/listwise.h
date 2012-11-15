@@ -19,7 +19,7 @@ typedef struct lstack
 			int			l;		// len - number of characters
 			int			a;		// alloc
 
-			uint8_t	type;	// object type - ignore unless using the list-object interface
+			uint8_t	type;	// object type - see list/object interface
 		}					*s;
 
 		struct	// internal tmp space
@@ -28,6 +28,8 @@ typedef struct lstack
 
 			int			l;
 			int			a;
+
+			int			w;	// isset
 		}					*t;
 
 		int			l;	// len - number of strings

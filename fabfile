@@ -14,21 +14,15 @@ LFLAGS	=[ -llistwise ]
 [ main.o ] : [ main.c ]
 [ main.o ] : [ args.o ]
 
-BFOO=[$*] =>> rx/aneed
-FOO=[$*] =>> rx/aneed/rx/name
-#rx/aneed/fx/ext/ss/rx/name
-#rx/aneed/ss/u/fx/ext/ss
-#/rx/name
+[ args.o ] : [ args.c args.h ]
 
-#[ args.o ] : [ args.c args.h ]
-#
 ## recipes
-#[ listwise ]
-#{
-#	[ $CC $CFLAGS ] -o [ $@ ] =>> a/path [ $@ ] =>> a/aneed/a/path/m/[.]o$ -llistwise
-#}
-#
-#[ $# ] =>> ls/s/[.]c$/.o/y
-#{
-#	[ $CC $CFLAGS ] -c [ $@ ] =>> a/ineed/a/path/m/[.]c$ -o [ $@ ] =>> a/path
-#}
+[ listwise ]
+{
+	[ $CC $CFLAGS ] -o [ $@ ] =>> a/path [ $@ ] =>> a/aneed/a/path/m/[.]o$ -llistwise
+}
+
+[ $# ] =>> ls/s/[.]c$/.o/y
+{
+	[ $CC $CFLAGS ] -c [ $@ ] =>> a/ineed/a/path/m/[.]c$ -o [ $@ ] =>> a/path
+}

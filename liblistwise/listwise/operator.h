@@ -223,11 +223,11 @@ int lstack_string(lstack* const restrict ls, int x, int y, char ** r, int * rl);
 
 /// lstack_getstring
 //
-// write the string for the entry at the specified position to the specified buffer
-//  always writes a null byte @ s[l]
-//  writes at MOST l bytes to s
+// get a null-terminated string for the entry at the specified position
 //
-int lstack_getstring(lstack* const restrict ls, int x, int y, char * s, size_t l);
+//  ** use lstack_string wherever possible, this function consumes tmp space **
+//
+char* lstack_getstring(lstack* const restrict ls, int x, int y);
 
 /// ensure
 //

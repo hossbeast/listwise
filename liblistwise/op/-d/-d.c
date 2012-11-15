@@ -59,28 +59,15 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(go)
 		{
-			char * s;
-			int l;
-			lstack_getstring(ls, 0, x, &s, &l);
-
-			if(s[l])
-			{
-				char * ss = alloca(l + 1);
-				memcpy(ss, s, l);
-				ss[l] = 0;
-
-				s = ss;
-			}
-
 			struct stat st;
-			if(stat(lstack_string(ls, 0, x), &st) == 0)
+			if(stat(lstack_getstring(ls, 0, x), &st) == 0)
 			{
 				if(S_ISDIR(st.st_mode))
 					fatal(lstack_last_set, ls, x);
 			}
 			else
 			{
-				dprintf(listwise_err_fd, "stat('%s')=[%d][%s]\n", lstack_string(ls, 0, x), errno, strerror(errno));
+				dprintf(listwise_err_fd, "stat('%s')=[%d][%s]\n", lstack_getstring(ls, 0, x), errno, strerror(errno));
 			}
 		}
 	}

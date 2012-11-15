@@ -65,8 +65,8 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 			if(p != -1)
 			{
-				lstack_getstring(ls, 0, p, &As, &Asl);
-				lstack_getstring(ls, 0, x, &Bs, &Bsl);
+				lstack_string(ls, 0, p, &As, &Asl);
+				lstack_string(ls, 0, x, &Bs, &Bsl);
 			}
 
 			if(p == -1 || xstrcmp(As, Asl, Bs, Bsl, 0))

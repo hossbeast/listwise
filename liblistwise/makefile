@@ -86,8 +86,16 @@ exports : ${SOURCES}
 generator/generator.o : generator/generator.tab.h
 generator/generator.o : generator/generator.lex.h
 
-op/s/s.so : common/xmem.o
+lstack.o : common/xmem.o
+
+re.o : common/xmem.o
+
+op.o : common/xmem.o
+
+object.o : common/idx.o
+
 op/s/s.so : common/parseint.o
+op/s/s.so : common/xmem.o
 
 op/u/u.so : common/xstring.o
 op/u/u.so : common/xmem.o
@@ -95,11 +103,8 @@ op/u/u.so : common/xmem.o
 op/ss/ss.so : common/xstring.o
 op/ss/ss.so : common/xmem.o
 
-lstack.o : common/xmem.o
-re.o : common/xmem.o
-op.o : common/xmem.o
-
-object.o : common/idx.o
+op/sn/sn.so : common/parseint.o
+op/sn/sn.so : common/xmem.o
 
 #
 # phony targets

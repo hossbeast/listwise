@@ -41,9 +41,18 @@ static int ensure(lstack * const restrict ls, int x, int y, int z)
 			// ensure list has enough strings
 			if(ls->s[x].a <= y)
 			{
-				fatal(xrealloc
+				// list of strings
+				fatal(xrealloc	
 					, &ls->s[x].s
 					, sizeof(ls->s[x].s[0])
+					, y + 1
+					, ls->s[x].a
+				);
+
+				// list of tmp space
+				fatal(xrealloc
+					, &ls->s[x].t
+					, sizeof(ls->s[x].t[0])
 					, y + 1
 					, ls->s[x].a
 				);
@@ -98,6 +107,9 @@ static int writestack(lstack* const restrict ls, int x, int y, const void* const
 		ls->s[x].s[y].type = 0;
 	}
 
+	// dirty the temp space for this entry
+	ls->s[x].t[y].w = 0;
+
 	return 1;
 }
 
@@ -115,6 +127,8 @@ static int vwritestack(lstack* const restrict ls, int x, int y, const char* cons
 	va_end(va2);
 
 	ls->s[x].s[y].l = l;
+	ls->s[x].s[y].type = 0;
+	ls->s[x].t[y].w = 0;
 
 	return 1;
 }
@@ -150,6 +164,9 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 
 	// the initial state of the selection is all
 	fatal(lstack_sel_all, *ls);
+
+	if(dump)
+		lstack_dump(*ls);
 
 	// execute all operations
 	int isor = 0;
@@ -196,6 +213,7 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 
 	fatal(lstack_last_clear, *ls);
 
+	// clear string props set with the fx operator
 	for(x = 0; x < object_registry.l; x++)
 		xfree(&object_registry.e[x]->string_property);
 
@@ -229,9 +247,13 @@ void API lstack_free(lstack* ls)
 		for(x = 0; x < ls->a; x++)
 		{
 			for(y = 0; y < ls->s[x].a; y++)
+			{
 				free(ls->s[x].s[y].s);
+				free(ls->s[x].t[y].s);
+			}
 
 			free(ls->s[x].s);
+			free(ls->s[x].t);
 		}
 
 		free(ls->s);
@@ -258,12 +280,17 @@ void API lstack_reset(lstack* ls)
 		for(x = 0; x < ls->l; x++)
 		{
 			for(y = 0; y < ls->s[x].l; y++)
+			{
 				ls->s[x].s[y].l = 0;
+				ls->s[x].s[y].type = 0;
+				ls->s[x].t[y].w = 0;
+			}
 
 			ls->s[x].l = 0;
 		}
 
 		ls->l = 0;
+		ls->sel.all = 1;
 	}
 }
 
@@ -321,6 +348,8 @@ void API lstack_dump(lstack* ls)
 void API lstack_clear(const lstack * const restrict ls, int x, int y)
 {
 	ls->s[x].s[y].l = 0;
+	ls->s[x].s[y].type = 0;
+	ls->s[x].t[y].w = 0;
 }
 
 int API lstack_append(lstack * const restrict ls, int x, int y, const char* const restrict s, int l)
@@ -333,6 +362,9 @@ int API lstack_append(lstack * const restrict ls, int x, int y, const char* cons
 	memcpy(ls->s[x].s[y].s + ls->s[x].s[y].l, s, l);
 	ls->s[x].s[y].s[ls->s[x].s[y].l + l] = 0;
 	ls->s[x].s[y].l += l;
+	ls->s[x].s[y].type = 0;
+
+	ls->s[x].t[y].w = 0;
 
 	return 1;
 }
@@ -398,6 +430,7 @@ int API lstack_unshift(lstack* const restrict ls)
 
 	// allocate new list at index 0
 	fatal(xmalloc, &ls->s[0].s, sizeof(ls->s[0].s[0]));
+	fatal(xmalloc, &ls->s[0].t, sizeof(ls->s[0].t[0]));
 	ls->s[0].l = 0;
 	ls->s[0].a = 0;
 
@@ -497,6 +530,9 @@ int API lstack_move(lstack * const restrict ls, int ax, int ay, int bx, int by)
 
 	ls->s[bx].l--;
 	ls->s[bx].a--;
+
+	ls->s[bx].t[ay].w = 0;
+	ls->s[bx].t[by].w = 0;
 }
 
 int API lstack_string(lstack* const restrict ls, int x, int y, char ** r, int * rl)
@@ -521,18 +557,38 @@ int API lstack_string(lstack* const restrict ls, int x, int y, char ** r, int * 
 	return 1;
 }
 
-int API lstack_getstring(lstack* const restrict ls, int x, int y, char * s, size_t l)
+typedef char* charstar;
+charstar API lstack_getstring(lstack* const restrict ls, int x, int y)
 {
-	char * r = 0;
-	int    rl = 0;
-
-	if(lstack_string(ls, x, y, &r, &rl))
+	if(ls->s[x].t[y].w == 0)
 	{
-		int z = MIN(rl, l - 1);
-		memcpy(s, r, z);
-		s[z] = 0;
-		return 1;
+		char * r = 0;
+		int    rl = 0;
+
+		if(lstack_string(ls, x, y, &r, &rl))
+		{
+			if(ls->s[x].t[y].a <= rl)
+			{
+				fatal(xrealloc
+					, &ls->s[x].t[y].s
+					, sizeof(ls->s[x].t[y].s[0])
+					, rl + 1
+					, ls->s[x].t[y].a
+				);
+
+				ls->s[x].t[y].a = rl + 1;
+			}
+
+			memcpy(ls->s[x].t[y].s, r, rl);
+			ls->s[x].t[y].s[rl] = 0;
+			ls->s[x].t[y].l = rl;
+			ls->s[x].t[y].w = 1;
+		}
+		else
+		{
+			return 0;
+		}
 	}
 
-	return 0;
+	return ls->s[x].t[y].s;
 }

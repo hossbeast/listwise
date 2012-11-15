@@ -4,6 +4,8 @@
 
 #include <listwise/operator.h>
 
+#include "parseint.h"
+
 /*
 
 sn operator - sort numbers (in ascending order)
@@ -61,22 +63,14 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 	int compar(const void * A, const void * B)
 	{
-		char Abuf[64];
 		intmax_t Aval;
-		char Bbuf[64];
 		intmax_t Bval;
 
-		if(lstack_getstring(ls, 0, *(int*)A, Abuf, sizeof(Abuf)))
+		if(parseint(lstack_getstring(ls, 0, *(int*)A), SCNdMAX, INTMAX_MIN, INTMAX_MAX, 0, 0xFF, &Aval, 0))
 		{
-			if(lstack_getstring(ls, 0, *(int*)B, Bbuf, sizeof(Bbuf)))
+			if(parseint(lstack_getstring(ls, 0, *(int*)B), SCNdMAX, INTMAX_MIN, INTMAX_MAX, 0, 0xFF, &Bval, 0))
 			{
-				if(parseint(Abuf, SCNdMAX, INTMAX_MIN, INTMAX_MAX, &Aval, 0))
-				{
-					if(parseint(Bbuf, SCNdMAX, INTMAX_MIN, INTMAX_MAX, &Bval, 0))
-					{
-						return Aval - Bval;
-					}
-				}
+				return Aval - Bval;
 			}
 		}
 

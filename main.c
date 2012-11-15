@@ -101,16 +101,6 @@ int main(int argc, char** argv)
 				munmap(mem, st.st_size);
 		}
 
-		// write init elements to top of list stack
-		for(x = 0; x < g->argsl; x++)
-		{
-			if(lstack_add(ls, g->args[x]->s, g->args[x]->l) == 0)
-				FAIL("lstack_add failed");
-		}
-
-		if(g_args.dump)
-			lstack_dump(ls);
-
 // not part of the actual API
 extern int lstack_exec_internal(generator* g, char** init, int* initls, int initl, lstack** ls, int dump);
 
@@ -128,7 +118,7 @@ extern int lstack_exec_internal(generator* g, char** init, int* initls, int init
 
 			char * ss = 0;
 			int    ssl = 0;
-			lstack_getstring(ls, 0, x, &ss, &ssl);
+			lstack_string(ls, 0, x, &ss, &ssl);
 			printf("%.*s", ssl, ss);
 
 			if(g_args.out_null)
