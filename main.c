@@ -124,9 +124,12 @@ extern int lstack_exec_internal(generator* g, char** init, int* initls, int init
 		if(go)
 		{
 			if(g_args.number)
-				printf("%d %3d ", x, i++);
+				printf("%3d ", i++);
 
-			printf("%s", lstack_string(ls, 0, x));
+			char * ss = 0;
+			int    ssl = 0;
+			lstack_getstring(ls, 0, x, &ss, &ssl);
+			printf("%.*s", ssl, ss);
 
 			if(g_args.out_null)
 				printf("%hhu", 0);

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <alloca.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -58,6 +59,19 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(go)
 		{
+			char * s;
+			int l;
+			lstack_getstring(ls, 0, x, &s, &l);
+
+			if(s[l])
+			{
+				char * ss = alloca(l + 1);
+				memcpy(ss, s, l);
+				ss[l] = 0;
+
+				s = ss;
+			}
+
 			struct stat st;
 			if(stat(lstack_string(ls, 0, x), &st) == 0)
 			{
