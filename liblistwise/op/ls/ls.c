@@ -46,11 +46,15 @@ int op_validate(operation* o)
 	return 1;
 }
 
-static int listing(lstack* ls, char * s)
+static int listing(lstack* ls, char * s, l)
 {
 	DIR * dd = 0;
 
-	if((dd = opendir(s)))
+	char tmp[l + 1];
+	memcpy(tmp, s, l);
+	tmp[l] = 0;
+
+	if((dd = opendir(tmp)))
 	{
 		struct dirent ent;
 		struct dirent * entp = 0;
@@ -62,7 +66,10 @@ static int listing(lstack* ls, char * s)
 				if(entp)
 				{
 					if(strcmp(entp->d_name, ".") && strcmp(entp->d_name, ".."))
-						fatal(lstack_addf, ls, "%s/%s", s, entp->d_name);
+					{
+						fatal(lstack_addf, ls, "%.*s/%s", l, s, entp->d_name);
+						fatal(listing, ls, ls->s[0].s[ls->s[0].l - 1].s, ls->s[0].s[ls->s[0].l - 1].l);
+					}
 				}
 				else
 				{
@@ -75,9 +82,9 @@ static int listing(lstack* ls, char * s)
 			}
 		}
 	}
-	else
+	else if(errno != ENOTDIR)
 	{
-		dprintf(listwise_err_fd, "opendir('%s')=[%d][%s]\n", s, errno, strerror(errno));
+		dprintf(listwise_err_fd, "opendir('%.*s')=[%d][%s]\n", l, s, errno, strerror(errno));
 	}
 
 	closedir(dd);
@@ -108,7 +115,13 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			}
 
 			if(go)
-				fatal(listing, ls, lstack_string(ls, 1, x));
+			{
+				char * s;
+				int l;
+				lstack_string(ls, 1, x, &s, &l);
+
+				fatal(listing, ls, s, l);
+			}
 		}
 	}
 

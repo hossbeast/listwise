@@ -61,7 +61,26 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 	int compar(const void * A, const void * B)
 	{
-		return atoi(lstack_string(ls, 0, *(int*)A)) - atoi(lstack_string(ls, 0, *(int*)B));
+		char Abuf[64];
+		intmax_t Aval;
+		char Bbuf[64];
+		intmax_t Bval;
+
+		if(lstack_getstring(ls, 0, *(int*)A, Abuf, sizeof(Abuf)))
+		{
+			if(lstack_getstring(ls, 0, *(int*)B, Bbuf, sizeof(Bbuf)))
+			{
+				if(parseint(Abuf, SCNdMAX, INTMAX_MIN, INTMAX_MAX, &Aval, 0))
+				{
+					if(parseint(Bbuf, SCNdMAX, INTMAX_MIN, INTMAX_MAX, &Bval, 0))
+					{
+						return Aval - Bval;
+					}
+				}
+			}
+		}
+
+		return 0;
 	}
 
 	qsort(mema, i, sizeof(mema[0]), compar);

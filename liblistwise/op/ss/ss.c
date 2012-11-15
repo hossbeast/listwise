@@ -5,6 +5,8 @@
 
 #include <listwise/operator.h>
 
+#include "xstring.h"
+
 /*
 
 ss operator - sort strings (in ascending order)
@@ -62,7 +64,15 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 	int compar(const void * A, const void * B)
 	{
-		return strcmp(lstack_string(ls, 0, *(int*)A), lstack_string(ls, 0, *(int*)B));
+		char * As;
+		int Asl;
+		char * Bs;
+		int Bsl;
+
+		lstack_string(ls, 0, *(int*)A, &As, &Asl);
+		lstack_string(ls, 0, *(int*)B, &Bs, &Bsl);
+
+		return xstrcmp(As, Asl, Bs, Bsl, 0);
 	}
 
 	qsort(mema, i, sizeof(mema[0]), compar);

@@ -89,6 +89,12 @@ generator/generator.o : generator/generator.lex.h
 op/s/s.so : common/xmem.o
 op/s/s.so : common/parseint.o
 
+op/u/u.so : common/xstring.o
+op/u/u.so : common/xmem.o
+
+op/ss/ss.so : common/xstring.o
+op/ss/ss.so : common/xmem.o
+
 lstack.o : common/xmem.o
 re.o : common/xmem.o
 op.o : common/xmem.o

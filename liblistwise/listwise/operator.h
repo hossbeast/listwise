@@ -217,15 +217,17 @@ int lstack_merge(lstack* const restrict ls, int a, int b)
 
 /// lstack_string
 //
-// get a string for the entry at the specified position
+// get pointer/length of a string for the entry at the specified position
 //
-char* lstack_string(lstack* const restrict ls, int x, int y);
+int lstack_string(lstack* const restrict ls, int x, int y, char ** r, int * rl);
 
 /// lstack_getstring
 //
-// get a string for the entry at the specified position
+// write the string for the entry at the specified position to the specified buffer
+//  always writes a null byte @ s[l]
+//  writes at MOST l bytes to s
 //
-char* lstack_getstring(lstack* const restrict ls, int x, int y, char ** r, int * rl);
+int lstack_getstring(lstack* const restrict ls, int x, int y, char * s, size_t l);
 
 /// ensure
 //

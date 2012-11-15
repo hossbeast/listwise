@@ -119,7 +119,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			{
 				char * s;
 				int l;
-				lstack_getstring(ls, 1, x, &s, &l);
+				lstack_string(ls, 1, x, &s, &l);
 
 				fatal(listing, ls, s, l);
 			}

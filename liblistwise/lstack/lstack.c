@@ -498,3 +498,41 @@ int API lstack_move(lstack * const restrict ls, int ax, int ay, int bx, int by)
 	ls->s[bx].l--;
 	ls->s[bx].a--;
 }
+
+int API lstack_string(lstack* const restrict ls, int x, int y, char ** r, int * rl)
+{
+	if(ls->s[x].s[y].type)
+	{
+		listwise_object* o = idx_lookup_val(object_registry.by_type, &ls->s[x].s[y].type, 0);
+
+		if(o)
+		{
+			o->string(*(void**)ls->s[x].s[y].s, o->string_property, r, rl);
+
+			return 1;
+		}
+
+		return 0;
+	}
+
+	*r  = ls->s[x].s[y].s;
+	*rl = ls->s[x].s[y].l;
+
+	return 1;
+}
+
+int API lstack_getstring(lstack* const restrict ls, int x, int y, char * s, size_t l)
+{
+	char * r = 0;
+	int    rl = 0;
+
+	if(lstack_string(ls, x, y, &r, &rl))
+	{
+		int z = MIN(rl, l - 1);
+		memcpy(s, r, z);
+		s[z] = 0;
+		return 1;
+	}
+
+	return 0;
+}

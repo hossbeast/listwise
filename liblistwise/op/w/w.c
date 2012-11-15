@@ -72,7 +72,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			if(off < 0)
 				off = ls->s[0].s[x].l + off;
 			if(len == 0)
-				len = ls->s[0].s[x].l;
+				len = ls->s[0].s[x].l - off;
 
 			if(ls->s[0].s[x].l >= (off + len))
 			{
