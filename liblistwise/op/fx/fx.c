@@ -37,7 +37,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(o->argsl)
 		{
-			list[x]->string_property = calloc(1, o->args[x]->l);
+			list[x]->string_property = calloc(1, o->args[x]->l+1);
 			memcpy(list[x]->string_property, o->args[x]->s, o->args[x]->l);
 		}
 	}

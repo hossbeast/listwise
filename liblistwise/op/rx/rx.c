@@ -77,7 +77,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 					int i;
 					for(i = 0; i < rl; i++)
 					{
-						if(rtypes[i])
+						if(rtypes && rtypes[i])
 							fatal(lstack_obj_write, ls, 0, x + i, r[i], rtypes[i]);
 						else
 							fatal(lstack_write, ls, 0, x + i, r[i], rls[i]);

@@ -85,6 +85,7 @@ static int writestack(lstack* const restrict ls, int x, int y, const void* const
 		// copy the pointer, set the type
 		memcpy(ls->s[x].s[y].s, (void*)&s, sizeof(s));
 		ls->s[x].s[y].type = type;
+		ls->s[x].s[y].l = 0;
 	}
 	else
 	{
@@ -94,6 +95,7 @@ static int writestack(lstack* const restrict ls, int x, int y, const void* const
 		memcpy(ls->s[x].s[y].s, s, l);
 		ls->s[x].s[y].s[l] = 0;
 		ls->s[x].s[y].l = l;
+		ls->s[x].s[y].type = 0;
 	}
 
 	return 1;
@@ -193,6 +195,9 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 		fatal(yoper.op->op_exec, &yoper, *ls, &ovec, &ovec_len);
 
 	fatal(lstack_last_clear, *ls);
+
+	for(x = 0; x < object_registry.l; x++)
+		xfree(&object_registry.e[x]->string_property);
 
 	if(dump)
 		lstack_dump(*ls);
