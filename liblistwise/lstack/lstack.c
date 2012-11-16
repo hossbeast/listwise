@@ -333,14 +333,26 @@ void API lstack_dump(lstack* ls)
 				}
 			}
 
-			printf("[%4d,%4d] %s%s '%.*s'\n"
+			printf("[%4d,%4d] %s%s "
 				, x
 				, y
 				, sel ? ">" : " "
 				, last ? ">" : " "
-				, ls->s[x].s[y].l
-				, ls->s[x].s[y].s
 			);
+
+			if(ls->s[x].s[y].type)
+			{
+				char * s;
+				int l;
+				lstack_string(ls, x, y, &s, &l);
+
+				printf("[%hhu]%p (%.*s)", ls->s[x].s[y].type, *(void**)ls->s[x].s[y].s, l, s);
+			}
+			else
+			{
+				printf("'%.*s'", ls->s[x].s[y].l, ls->s[x].s[y].s);
+			}
+			printf("\n");
 		}
 	}
 }

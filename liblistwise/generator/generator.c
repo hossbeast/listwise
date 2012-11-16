@@ -51,7 +51,7 @@ int API generator_parse(generator_parser* p, char* s, int l, generator** g)
 		{
 			if((*g)->ops[x]->argsl)
 			{
-				printf("%s - arguments not expected", (*g)->ops[x]->op->s);
+				dprintf(listwise_err_fd, "%s - arguments not expected\n", (*g)->ops[x]->op->s);
 				return 0;
 			}
 		}

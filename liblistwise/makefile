@@ -94,6 +94,8 @@ op.o : common/xmem.o
 
 object.o : common/idx.o
 
+op/cp/cp.so : common/xmem.o
+
 op/s/s.so : common/parseint.o
 op/s/s.so : common/xmem.o
 
