@@ -1,7 +1,9 @@
 # variables
-CC			=[ gcc ]
-CFLAGS	=[ -m64 -O3 -Werror -D_GNU_SOURCE -fPIC ]
-LFLAGS	=[ -llistwise ]
+CC			= [ gcc ]
+CFLAGS	= [ -m64 -O3 -Werror -D_GNU_SOURCE -fPIC ]
+LFLAGS	= [ -llistwise ]
+
+INSTALL	= [ install ]
 
 # executable depends on .o for each .c
 [ listwise ] : [ $# ] =>> ls/s/[.]c$/.o/y
@@ -12,6 +14,8 @@ LFLAGS	=[ -llistwise ]
 
 [ args.o ] : [ args.c args.h ]
 
+[ install ] : [ listwise ]
+
 ## recipes
 [ listwise ]
 {
@@ -21,4 +25,11 @@ LFLAGS	=[ -llistwise ]
 [ $# ] =>> ls/s/[.]c$/.o/y
 {
 	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/m/[.]c$/ss/u -o [ $@ ]
+}
+
+[ install ]
+{
+	install -d             /usr/local/bin/
+	install listwise       /usr/local/bin/listwise
+	ln -vfs listwise       /usr/local/bin/lw
 }

@@ -53,18 +53,22 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		int x;
 		for(x = ls->s[1].l - 1; x >= 0; x--)
 		{
-			if(ls->sel.sl > (x/8))
+			if((ls->sel.sl <= (x/8)) || (ls->sel.s[x/8] & (0x01 << (x%8))) == 0)
 			{
-				if((ls->sel.s[x/8] & (0x01 << (x%8))) == 0)
-				{
-					ls->s[0].s[i++] = ls->s[1].s[x];
+				ls->s[0].s[ls->s[1].l - ls->sel.l - 1 - i] = ls->s[1].s[x];
+				ls->s[0].t[ls->s[1].l - ls->sel.l - 1 - i] = ls->s[1].t[x];
+				i++;
 
-					memmove(
-						  &ls->s[1].s[x]
-						, &ls->s[1].s[x+1]
-						, (ls->s[1].l - x - 1) * sizeof(ls->s[0].s[0])
-					);
-				}
+				memmove(
+						&ls->s[1].s[x]
+					, &ls->s[1].s[x+1]
+					, (ls->s[1].l - x - 1) * sizeof(ls->s[0].s[0])
+				);
+				memmove(
+						&ls->s[1].t[x]
+					, &ls->s[1].t[x+1]
+					, (ls->s[1].l - x - 1) * sizeof(ls->s[0].t[0])
+				);
 			}
 		}
 
