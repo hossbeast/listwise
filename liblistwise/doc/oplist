@@ -22,7 +22,7 @@ dn      dirname
 interlist operators
 d       sunDer selected
 c       Coalesce
-x       eXchange
+xch     eXCHange
 dj			DisJoin
 
 inplace intralist operators

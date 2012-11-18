@@ -99,6 +99,8 @@ int main(int argc, char** argv)
 
 			if(S_ISREG(st.st_mode))
 				munmap(mem, st.st_size);
+
+			free(mem);
 		}
 
 // not part of the actual API
@@ -110,23 +112,56 @@ extern int lstack_exec_internal(generator* g, char** init, int* initls, int init
 
 		// OUTPUT
 		int i = 0;
-		LSTACK_LOOP_ITER(ls, x, go);
-		if(go)
+		int y = 0;
+		for(y = 0; y < ls->l; y++)
 		{
-			if(g_args.number)
-				printf("%3d ", i++);
+			if(y)
+			{
+				if(g_args.out_null)
+					printf("\0");
+				else
+					printf("\n");
 
-			char * ss = 0;
-			int    ssl = 0;
-			lstack_string(ls, 0, x, &ss, &ssl);
-			printf("%.*s", ssl, ss);
+				i = 0;
+			}
 
-			if(g_args.out_null)
-				printf("%hhu", 0);
-			else
-				printf("\n");
+			for(x = 0; x < ls->s[y].l; x++)
+			{
+				int go = 1;
+				if(!g_args.out_list && !ls->sel.all)
+				{
+					go = 0;
+					if(ls->sel.sl > (x/8))
+					{
+						go = ls->sel.s[x/8] & (0x01 << (x%8));
+					}
+				}
+
+				if(go)
+				{
+					if(g_args.number)
+					{
+						if(g_args.out_stack)
+							printf("%3d %3d ", y, i++);
+						else
+							printf("%3d ", i++);
+					}
+
+					char * ss = 0;
+					int    ssl = 0;
+					lstack_string(ls, y, x, &ss, &ssl);
+					printf("%.*s", ssl, ss);
+
+					if(g_args.out_null)
+						printf("\0");
+					else
+						printf("\n");
+				}
+			}
+
+			if(!g_args.out_stack)
+				break;
 		}
-		LSTACK_LOOP_DONE;
 	}
 
 	free(ovec);

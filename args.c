@@ -23,6 +23,9 @@ static void usage(int help)
 		"\n"
 		"------------------[options]----------------------------------------\n"
 		"\n"
+		" -k    output entire stack, not just top list\n"
+	 	"       implies -a\n"
+		" -a    output entire list, not just selected entries\n"
 		" -d    dump list-stack at each step during execution\n"
 		" -n    number output items\n"
 		" -z    separate output items with null byte instead of newline\n"
@@ -69,12 +72,19 @@ static void usage(int help)
 int parse_args(int argc, char** argv)
 {
 	int c;
-	while((c = getopt(argc, argv, "hdnz0")) != -1)
+	while((c = getopt(argc, argv, "adhknz0")) != -1)
 	{
 		switch(c)
 		{
+			case 'a':
+				g_args.out_list = 1;
+				break;
 			case 'd':
 				g_args.dump = 1;
+				break;
+			case 'k':
+				g_args.out_stack = 1;
+				g_args.out_list = 1;
 				break;
 			case 'n':
 				g_args.number = 1;

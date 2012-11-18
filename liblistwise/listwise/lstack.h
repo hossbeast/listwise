@@ -7,21 +7,46 @@
 /// [[ LSTACK API ]]
 ///
 
-// iterate the selected elements of the 0th list of the lstack
-#define LSTACK_LOOP_ITER(ls, x, go)											\
-	for(x = 0; x < (ls)->s[0].l; x++)											\
-	{																											\
-		int go = 1;																					\
-		if(!(ls)->sel.all)																	\
-		{																										\
-			go = 0;																						\
-			if((ls)->sel.sl > (x/8))													\
-			{																									\
-				go = ((ls)->sel.s[x/8] & (0x01 << (x%8)));			\
-			}																									\
+#define LSTACK_ITERATE_LOOP(ls, y, go)							\
+	{																									\
+		int go = 1;																			\
+		if(!(ls)->sel.all)															\
+		{																								\
+			go = 0;																				\
+			if((ls)->sel.sl > (y/8))											\
+			{																							\
+				go = ((ls)->sel.s[y/8] & (0x01 << (y%8)));	\
+			}																							\
 		}
 
-#define LSTACK_LOOP_DONE	}
+#define LSTACK_ITERATE_HEADER(ls, x, y, go)	\
+	for(y = 0; y < (ls)->s[x].l; y++)
+
+#define LSTACK_ITERREV_HEADER(ls, x, y, go)	\
+	for(y = (ls)->s[x].l - 1; y >= 0; y--)
+
+// iterate the selected elements of the 0th list of the lstack
+#define LSTACK_ITERATE(ls, y, go)				\
+	LSTACK_ITERATE_HEADER(ls, 0, y, go)		\
+	LSTACK_ITERATE_LOOP(ls, y, go)
+
+// iterate in reverse the selected elements of the 0th list of the lstack
+#define LSTACK_ITERREV(ls, y, go)				\
+	LSTACK_ITERREV_HEADER(ls, 0, y, go)		\
+	LSTACK_ITERATE_LOOP(ls, y, go)
+
+// iterate the selected elements of the xth list on the lstack
+#define LSTACK_ITERATE_LIST(ls, x, y, go) \
+	LSTACK_ITERATE_HEADER(ls, x, y, go)			\
+	LSTACK_ITERATE_LOOP(ls, y, go)
+
+// iterate in reverse the selected elements of the xth list on the lstack
+#define LSTACK_ITERREV_LIST(ls, x, y, go)	\
+	LSTACK_ITERREV_HEADER(ls, x, y, go)			\
+	LSTACK_ITERATE_LOOP(ls, y, go)
+
+// close an iterate block
+#define LSTACK_ITEREND }
 
 /// lstack_exec
 //

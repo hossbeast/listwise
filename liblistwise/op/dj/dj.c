@@ -131,7 +131,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 	// move the displaced portion to the end
 	memcpy(
-		  &ls->s[k + i]
+		  &ls->s[k + i - 1]
 		, T
 		, i * sizeof(ls->s[0])
 	);

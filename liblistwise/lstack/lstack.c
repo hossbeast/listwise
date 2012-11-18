@@ -424,8 +424,21 @@ int API lstack_obj_add(lstack* const restrict ls, const void* const restrict o, 
 
 int API lstack_shift(lstack* const restrict ls)
 {
+	// shift removes the first list from the stack
 	if(ls->l)
+	{
+		typeof(ls->s[0]) T = ls->s[0];
+
+		memmove(
+			  &ls->s[0]
+			, &ls->s[1]
+			, (ls->l - 1) * sizeof(ls->s[0])
+		);
+
 		ls->l--;
+
+		ls->s[ls->l] = T;
+	}
 }
 
 int API lstack_unshift(lstack* const restrict ls)
@@ -451,20 +464,9 @@ int API lstack_unshift(lstack* const restrict ls)
 
 int API lstack_pop(lstack* const restrict ls)
 {
+	// pop removes the last list from the stack
 	if(ls->l)
-	{
-		typeof(ls->s[0]) T = ls->s[0];
-
-		memmove(
-			  &ls->s[0]
-			, &ls->s[1]
-			, (ls->l - 1) * sizeof(ls->s[0])
-		);
-
 		ls->l--;
-
-		ls->s[ls->l] = T;
-	}
 }
 
 int API lstack_push(lstack* const restrict ls)
@@ -532,6 +534,7 @@ int API lstack_move(lstack * const restrict ls, int ax, int ay, int bx, int by)
 
 	// copy
 	ls->s[ax].s[ay] = ls->s[bx].s[by];
+	ls->s[ax].t[ay] = ls->s[bx].t[by];
 
 	// delete
 	memmove(
@@ -540,11 +543,14 @@ int API lstack_move(lstack * const restrict ls, int ax, int ay, int bx, int by)
 		, (ls->s[bx].l - by - 1) * sizeof(ls->s[0].s[0])
 	);
 
+	memmove(
+		  &ls->s[bx].t[by]
+		, &ls->s[bx].t[by+1]
+		, (ls->s[bx].l - by - 1) * sizeof(ls->s[0].t[0])
+	);
+
 	ls->s[bx].l--;
 	ls->s[bx].a--;
-
-	ls->s[bx].t[ay].w = 0;
-	ls->s[bx].t[by].w = 0;
 }
 
 int API lstack_string(lstack* const restrict ls, int x, int y, char ** r, int * rl)
