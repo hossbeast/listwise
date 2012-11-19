@@ -26,6 +26,12 @@ OPERATION
    3.1. push an empty list onto the stack
    3.2. remove N items from top list into the new list
 
+AFTERWARDS, the stack looks like this
+
+0)      remainder list - unselected items in list 0 when we started
+1 .. n) newly-created lists
+n+1 ..) contents of the stack beyond list 0 when we started
+
 */
 
 static int op_validate(operation* o);
@@ -94,12 +100,17 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			, &ls->s[ls->l - 1].s[N - j]
 			, j * sizeof(ls->s[0].s[0])
 		);
+		memmove(
+			  &ls->s[ls->l - 1].t[0]
+			, &ls->s[ls->l - 1].t[N - j]
+			, j * sizeof(ls->s[0].t[0])
+		);
 
 		ls->s[ls->l - 1].l = j;
 		ls->s[ls->l - 1].a = j;
 	}
 
-	// move the remainder list
+	// move the remainder list to just before the newly-created lists
 	typeof(ls->s[0]) G = ls->s[0];
 	memmove(
 		  &ls->s[0]
@@ -108,7 +119,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	);
 	ls->s[i] = G;
 
-	// reverse the portion of the stack just generated
+	// reverse the portion of the stack with the newly-created lists
 	for(x = i + 1; x <= ((i + k + 1) / 2); x++)
 	{
 		int a = x;
@@ -120,6 +131,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	}
 
 	// move the portion of the stack just generated to the top
+	//  (the new lists, and the remainder list)
 	typeof(ls->s[0])* T = alloca(i * sizeof(ls->s[0]));
 	memcpy(T, &ls->s[0], i * sizeof(ls->s[0]));
 
@@ -131,7 +143,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 	// move the displaced portion to the end
 	memcpy(
-		  &ls->s[k + i - 1]
+		  &ls->s[k + i - ((i % 2) ? 0 : 1)]
 		, T
 		, i * sizeof(ls->s[0])
 	);

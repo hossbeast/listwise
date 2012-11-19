@@ -25,8 +25,9 @@
 %option bison-bridge 
 %option prefix="generator_yy"
 %option extra-type="parse_param*"
+%option stack
 
-%x arg1 arg2 arg3
+%x lit
 
 %%
 
@@ -63,43 +64,10 @@
 									else
 										return LEX(STR);
 								}
-"<"							{
-									/* literal string */
-									yylval->str.s = 0;
-									yylval->str.l = 0;
-									int a = 0;
-									int n = 0;
-
-									while(1)
-									{
-										int c = input(yyscanner);
-										if(!n && c == '\\')
-										{
-											n++;
-										}
-										else
-										{
-											if(n && (c != '\\' && c != '>'))
-											{
-												// backslash followed by illegal character
-											}
-											else
-											{
-												if(c == EOF || (c == '>' && !n))
-												{
-													break;
-												}
-												else if(yylval->str.l == a)
-												{
-													yylval->str.s = realloc(yylval->str.s, yylval->str.l + 11);
-													a += 10;
-												}
-												yylval->str.s[yylval->str.l++] = c;
-											}
-
-											n = 0;
-										}
-									}
-				
+[<]							{ yy_push_state(lit, yyextra->scanner); }
+<lit>[^>]+			{
+									yylval->str.s = strdup(yytext);
+									yylval->str.l = yyleng;
 									return LEX(STR);
 								}
+<lit>[>]				{ yy_pop_state(yyextra->scanner); }

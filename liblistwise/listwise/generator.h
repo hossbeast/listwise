@@ -18,7 +18,8 @@ struct generator_t
 
 
 /// generator parser declaration
-typedef void generator_parser;
+struct generator_parser_t;
+typedef struct generator_parser_t generator_parser;
 
 ///
 /// [[ GENERATOR API ]]

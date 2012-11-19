@@ -9,6 +9,7 @@
 typedef struct
 {
 	int							r;			// return value of the parse
+	void*						scanner;
 	generator*			g;			// completed generator goes here
 } parse_param;
 

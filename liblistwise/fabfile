@@ -24,6 +24,21 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 
 [ liblistwise.so ] : [ exports ]
 
+[ generator/generator.o ] : [ generator/generator.h ]
+[ generator/generator.o ] : [ generator/generator.def.h ]
+[ generator/generator.o ] : [ generator/generator.y ]
+[ generator/generator.o ] : [ generator/generator.tab.c ]
+[ generator/generator.o ] : [ generator/generator.tab.h ]
+[ generator/generator.o ] : [ generator/generator.l ]
+[ generator/generator.o ] : [ generator/generator.lex.c ]
+[ generator/generator.o ] : [ generator/generator.lex.h ]
+
+# operator .so depends on its .o
+[ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y/dj/shift/pop : [ $^ ] =>> xs/<so>/<o>
+
+# each .o depends on its .c
+[ $# ] =>> lsr/xs/<c>/<o>/y/dj/shift/pop : [ $^ ] =>> xs/<o>/<c>
+
 ##
 ## formulas
 ##
@@ -57,7 +72,7 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 }
 
 # flex - create .lex.c and .lex.h from a .l
-[ $# ] =>> lsr/xs/<l>/lex.c/y/v/d/cp/u/xs/lex.c/lex.h/v/z/dj/2/shift/2/pop
+[ $# ] =>> lsr/xs/<l>/lex.c/y/v/d/cp/u/xs/lex.c/lex.h/v/z/dj/2/shift/pop/2
 {
 	[ $FLEX -o [ $@ ] =>> h/1/1 ]											\
 	[ --header-file= [ $@ ] =>> h/0/1/rx ] =>> j			\
@@ -65,7 +80,7 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 }
 
 # bison - create .tab.c and .tab.h from a .y
-[ $# ] =>> lsr/xs/<y>/tab.c/y/v/d/cp/u/xs/tab.c/tab.h/v/z/dj/2/shift/2/pop
+[ $# ] =>> lsr/xs/<y>/tab.c/y/v/d/cp/u/xs/tab.c/tab.h/v/z/dj/2/shift/pop/2
 {
 	[ $BISON --warnings=error -o [ $@ ] =>> h/1/1 -d ]	\
 	[ $@ ] =>> rx/ineed/xm/<y>

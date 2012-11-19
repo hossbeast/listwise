@@ -1,26 +1,35 @@
 #include "listwise/internal.h"
 
-#include "generator.h"
 #include "generator.def.h"
 #include "generator.tab.h"
 #include "generator.lex.h"
 
 #include "re.h"
 
+struct generator_parser_t
+{
+	void * p;		// scanner
+};
+
 // defined in the bison parser
 int generator_yyparse(yyscan_t, parse_param*);
 
 int API generator_mkparser(generator_parser** p)
 {
-	yyscan_t* scanner = p;
-	return generator_yylex_init(scanner) ? 0 : 1;
+	if((*p = calloc(1, sizeof(*p[0]))) == 0)
+		return 0;
+
+	if(generator_yylex_init(&(*p)->p) != 0)
+		return 0;
+
+	return 1;
 }
 
 int API generator_parse(generator_parser* p, char* s, int l, generator** g)
 {
 	// create state specific to this parse
 	void* state = 0;
-	if((state = generator_yy_scan_string(s, p)) == 0)
+	if((state = generator_yy_scan_string(s, p->p)) == 0)
 	{
 		return 0;
 	}
@@ -32,16 +41,17 @@ int API generator_parse(generator_parser* p, char* s, int l, generator** g)
 	parse_param pp = {
 		  .r = 1
 		, .g = *g
+		, .scanner = p->p
 	};
 
 	// make it available to the lexer
-	generator_yyset_extra(&pp, p);
+	generator_yyset_extra(&pp, p->p);
 
 	// parse
-	generator_yyparse(p, &pp);
+	generator_yyparse(p->p, &pp);
 
 	// cleanup state for this parse
-	generator_yy_delete_buffer(state, p);
+	generator_yy_delete_buffer(state, p->p);
 
 	// postprocessing
 	int x;
@@ -68,14 +78,17 @@ int API generator_parse(generator_parser* p, char* s, int l, generator** g)
 
 void API generator_parser_free(generator_parser* p)
 {
-	generator_yylex_destroy(p);
+	if(p)
+	{
+		generator_yylex_destroy(p->p);
+	}
+
+	free(p);
 }
 
 void API generator_parser_xfree(generator_parser** p)
 {
-	if(p)
-		generator_parser_free(*p);
-
+	generator_parser_free(*p);
 	*p = 0;
 }
 
@@ -89,7 +102,7 @@ void API generator_dump(generator* g)
 {
 	int x, y;
 
-	char s[256] = { [0] = 0 };
+	char s[2048] = {};
 
 	printf("generator @ %p {\n", g);
 	printf("  initial list\n");

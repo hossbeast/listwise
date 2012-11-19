@@ -92,16 +92,18 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 			if(s[0] == '.')
 			{
-				int xl = ls->s[0].s[x].l - (s - ls->s[0].s[x].s) - 1;
+				int o = s - ls->s[0].s[x].s;
+				int xl = ls->s[0].s[x].l - o - 1;
 				if(mxs)
 				{
 					if(mxl != xl || memcmp(s + 1, mxs, mxl))
 						continue;
 				}
 
-				int newl = (s - ls->s[0].s[x].s) + 1 + rxl;
+				o = s - ls->s[0].s[x].s;
+				int newl = o + 1 + rxl;
 				fatal(lstack_ensure, ls, 0, x, newl);
-				sprintf(s, ".%.*s", rxl, rxs);
+				sprintf(ls->s[0].s[x].s + o, ".%.*s", rxl, rxs);
 				ls->s[0].s[x].l = newl;
 				ls->s[0].t[x].w = 0;
 
