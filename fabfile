@@ -17,17 +17,17 @@ INSTALL	= [ install ]
 [ install ] : [ listwise ]
 
 ## recipes
-[ listwise ]
+[ listwise ] :
 {
 	[ $CC $CFLAGS -o $@ ] [ $@ ] =>> rx/aneed/m/[.]o$/ss/u -llistwise
 }
 
-[ $# ] =>> ls/s/[.]c$/.o/y
+[ $# ] =>> ls/s/[.]c$/.o/y :
 {
 	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/m/[.]c$/ss/u -o [ $@ ]
 }
 
-[ install ]
+[ install ] :
 {
 	install -d             /usr/local/bin/
 	install listwise       /usr/local/bin/listwise

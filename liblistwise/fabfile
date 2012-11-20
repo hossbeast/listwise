@@ -18,7 +18,7 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 [ all ] : [ liblistwise.so $OPLIST ]
 
 # library depends on .o for each c, l, and y
-[ liblistwise.so ] : [ $# ] =>> lsr/m/</op/>/v/xs/<c>/<o>/y
+[ liblistwise.so ] : [ $# ] =>> lsr/m/</op/[^/]+/>/v/xm/<c>
 [ liblistwise.so ] : [ $# ] =>> lsr/xs/<l>/<lex.o>/y
 [ liblistwise.so ] : [ $# ] =>> lsr/xs/<y>/<tab.o>/y
 
@@ -28,9 +28,11 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 [ generator/generator.o ] : [ generator/generator.tab.h ]
 
 [ generator/generator.lex.o ] : [ generator/generator.lex.c ]
+[ generator/generator.lex.c ] : [ generator/generator.l generator/generator.tab.h ]
+[ generator/generator.lex.h ] : [ generator/generator.l ]
 [ generator/generator.tab.o ] : [ generator/generator.tab.c ]
 [ generator/generator.tab.c ] : [ generator/generator.y ]
-[ generator/generator.lex.c ] : [ generator/generator.l ]
+[ generator/generator.tab.h ] : [ generator/generator.y ]
 
 [ lstack/lstack.o ]		: [ common/xmem.o ]
 [ re/re.o ]						: [ common/xmem.o ]
@@ -61,11 +63,11 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 # library exports
 [ exports ] :
 {
-	  echo "{ global: " > [ $@ ]
-	> sed 's/.*API\(DATA\)\?[[:space:]]\+\(\[a-zA-Z]\[0-9a-zA-Z_]*\).*/\2;/p; d'	\
-	  [ $@ ] =>> rx/aneed/m/[.]c/ss/u >> [ $@ ]
-	> echo "local: *; \};" \
-	  >> [ $@ ]
+	  exec 1>[ $@ ]
+	  echo "{ global: "
+	> sed 's/.*API\(DATA\)\?[[:space:]]\+\([a-zA-Z][0-9a-zA-Z_]*\).*/\2;/p; d' <(\
+	  cat -- [ $# ] =>> lsr/m/</op/[^/]+/>/v/xm/<c> )
+	> echo "local: *; };"
 }
 
 # link an operator so
@@ -98,5 +100,5 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 	[ $BISON --warnings=error -o ]		\
 	[ $@ ] =>> h/1/1									\
 	[ -d ]														\
-	[ $@ ] =>> rx/ineed/xm/<y>
+	[ $@ ] =>> rx/ineed/xm/<y>/ss/u
 }
