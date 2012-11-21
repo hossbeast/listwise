@@ -5,10 +5,11 @@ CC			= [ gcc ]
 FLEX		= [ flex ]
 BISON		= [ bison ]
 CFLAGS	= [ -m64 -O3 -Werror -D_GNU_SOURCE -fPIC [ $# ] =>> lsr/xm/<h>/rp/dn/ss/u/s/^/-I ]
-LFLAGS	= [ -lpcre -ldl -shared -Wl,--version-script=exports -Wl,-soname,-lliblistwise.so ]
+LFLAGS	= [ -lpcre -ldl -shared -Wl,--version-script=exports -Wl,-soname,-liblistwise.so ]
 
 # path to each operator so
-OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
+OPLIST	= [ $# ] =>> s/$/\/op/lsr/m/</op\.c>/v/xs/<c>/<so>/y/ss
+
 
 ##
 ## dependencies
@@ -18,7 +19,7 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 [ all ] : [ liblistwise.so $OPLIST ]
 
 # library depends on .o for each c, l, and y
-[ liblistwise.so ] : [ $# ] =>> lsr/m/</op/[^/]+/>/v/xm/<c>
+[ liblistwise.so ] : [ $# ] =>> lsr/m/</op/[^/]+/>/v/xs/<c>/<o>/y
 [ liblistwise.so ] : [ $# ] =>> lsr/xs/<l>/<lex.o>/y
 [ liblistwise.so ] : [ $# ] =>> lsr/xs/<y>/<tab.o>/y
 
@@ -27,10 +28,10 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 [ generator/generator.o ] : [ generator/generator.lex.h ]
 [ generator/generator.o ] : [ generator/generator.tab.h ]
 
-[ generator/generator.lex.o ] : [ generator/generator.lex.c ]
-[ generator/generator.lex.c ] : [ generator/generator.l generator/generator.tab.h ]
+[ generator/generator.lex.o ] : [ generator/generator.lex.c generator/generator.lex.h generator/generator.tab.h ]
+[ generator/generator.lex.c ] : [ generator/generator.l ]
 [ generator/generator.lex.h ] : [ generator/generator.l ]
-[ generator/generator.tab.o ] : [ generator/generator.tab.c ]
+[ generator/generator.tab.o ] : [ generator/generator.tab.c generator/generator.tab.h ]
 [ generator/generator.tab.c ] : [ generator/generator.y ]
 [ generator/generator.tab.h ] : [ generator/generator.y ]
 
@@ -42,10 +43,10 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 [ op/s/s.so ]					: [ common/xmem.o common/parseint.o ]
 [ op/u/u.so ]					: [ common/xmem.o common/xstring.o ]
 [ op/ss/ss.so ]				: [ common/xmem.o common/xstring.o ]
-[ op/sn/sn.so ]				: [ common/xmem.o common/xstring.o ]
+[ op/sn/sn.so ]				: [ common/xmem.o common/parseint.o ]
 
 # operator .so depends on its .o
-[ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<o>
+[ $OPLIST ] =>> dj/shift/pop :: [ $< ] =>> rx/xs/<o>
 
 # each .o depends on its .c
 [ $# ] =>> lsr/xs/<c>/<o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<c>
@@ -53,6 +54,8 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 ##
 ## formulas
 ##
+
+[ all ] : { } 
 
 # link the library
 [ liblistwise.so ] :
@@ -73,7 +76,10 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 # link an operator so
 [ $OPLIST ] :
 {
-	[ $CC $CFLAGS -o $@ [ $@ ] =>> rx/aneed/m/[.]o$/ss/u ] -L. -llistwise -shared -Wl,-soname,
+	[ $CC $CFLAGS -o $@ [ $@ ] =>> rx/aneed/xm/<o>/ss/u ]			\
+	[ -L. $# ] =>> j																					\
+	[ -llistwise -shared ]																		\
+	[ -Wl,-soname, [ $@ ] =>> rx/bn/fn .so ] =>> j
 }
 
 # compile .o from .c
@@ -83,7 +89,7 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 	[ $# ] =>> lsr/xs/<y>/<tab.o>/y
 ] :
 {
-	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/m/[.]c$/ss/u -o [ $@ ]
+	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
 }
 
 # flex - create .lex.c and .lex.h from a .l
@@ -102,3 +108,34 @@ OPLIST	= [ $# ] =>> s/$/\/op/lsr/xs/<c>/<so>/y
 	[ -d ]														\
 	[ $@ ] =>> rx/ineed/xm/<y>/ss/u
 }
+
+[ install ] : [ all ]
+
+[ install ] :
+{
+	install -d														/usr/lib
+	install	liblistwise.so								/usr/lib/liblistwise.so.0.1
+	ln -fs liblistwise.so.0.1							/usr/lib/liblistwise.so
+	install -d														/usr/include
+	install -d														/usr/include/listwise
+	install listwise.h										/usr/include/listwise.h
+	install listwise/operator.h						/usr/include/listwise/operator.h
+	install listwise/generator.h					/usr/include/listwise/generator.h
+	install listwise/ops.h								/usr/include/listwise/ops.h
+	install listwise/lstack.h							/usr/include/listwise/lstack.h
+	install listwise/object.h							/usr/include/listwise/object.h
+
+	install -d														/usr/lib/listwise
+	for x in [ $OPLIST ]; do \
+		install $x													/usr/lib/listwise
+	done
+}
+
+#[ clean ] :
+#{
+#	> find . -name *.o -delete
+#	> find . -name *.so -delete
+#	> find . -name *.lex.* -delete
+#	> find . -name *.tab.* -delete
+#	> find . -name exports -delete
+#}
