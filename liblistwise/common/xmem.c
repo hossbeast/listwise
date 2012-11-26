@@ -40,4 +40,3 @@ void xfree(void* target)
 	free(*t);
 	*t = 0;
 }
-

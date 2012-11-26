@@ -1,35 +1,64 @@
+#
 # variables
+#
 CC			= [ gcc ]
 CFLAGS	= [ -m64 -O3 -Werror -D_GNU_SOURCE -fPIC ]
 LFLAGS	= [ -llistwise ]
+BINDIR	= [ /usr/local/bin ]
+NAME		= [ listwise ]
+LINK		= [ lw ]
 
-INSTALL	= [ install ]
+SRCDIR	= [ $# ]
+DESTDIR	= [ / ]
+BINDIR	= [ usr/local/bin ]
 
-# executable depends on .o for each .c
-[ listwise ] : [ $# ] =>> ls/s/[.]c$/.o/y
+# expected object files
+OBJECTS	= [ $SRCDIR ] =>> ls/xs/<c>/<o>/y
+
+#
+# relations
+#
+[ $NAME ] : [ $OBJECTS ]
 
 # main uses args
-[ main.o ] : [ main.c ]
 [ main.o ] : [ args.h ]
+[ args.o ] : [ args.h ]
 
-[ args.o ] : [ args.c args.h ]
-
-[ install ] : [ listwise ]
-
-## recipes
-[ listwise ] :
+#
+# formulas
+#
+[ $NAME ] : 
 {
-	[ $CC $CFLAGS -o $@ ] [ $@ ] =>> rx/aneed/m/[.]o$/ss/u -llistwise
+	[ $CC $CFLAGS -o $@ ] [ $@ ] =>> rx/aneed/xm/<o>/ss/u [ $LFLAGS ]
 }
 
-[ $# ] =>> ls/s/[.]c$/.o/y :
+# make .o's
+[ $OBJECTS ] =>> dj/shift :: [ $< ] =>> rx/xs/<o>/<c>
 {
-	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/m/[.]c$/ss/u -o [ $@ ]
+	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
 }
 
-[ install ] :
+#
+# tasks
+#
+
+install : [ $NAME ]
 {
-	install -d             /usr/local/bin/
-	install listwise       /usr/local/bin/listwise
-	ln -vfs listwise       /usr/local/bin/lw
+	install -d														[ $DESTDIR / $BINDIR ] =>> j
+	install [ $SRCDIR / $NAME ] =>> j			[ $DESTDIR / $BINDIR / $NAME ] =>> j
+	ln -vfs [ $NAME ]											[ $DESTDIR / $BINDIR / $LINK ] =>> j
+}
+
+uninstall
+{
+	rm -f																	[ $DESTDIR / $BINDIR / $NAME ] =>> j
+	rm -f																	[ $DESTDIR / $BINDIR / $LINK ] =>> j
+}
+
+clean
+{
+	exec 2>/dev/null
+	rm -f [ $SRCDIR / *.o ] =>> j
+	rm -f [ $SRCDIR / $NAME ] =>> j
+	rm -f [ $SRCDIR / $LINK ] =>> j
 }
