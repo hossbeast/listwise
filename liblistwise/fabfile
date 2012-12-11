@@ -86,6 +86,17 @@ all : [ $LIB $OPLIST ]
 	[ -Wl,-soname, [ $@ ] =>> rx/bn/fn .so ] =>> j
 }
 
+# dependency discovery for .o files
+#[ $SRCDIR ] =>> lsr/xs/<c>/<o>/y/ss/u ~
+[ re ] =>> lsr/xs/<c>/<o>/y/ss/u ~
+{
+	  [ $CC $CFLAGS ] -MM -MP -MT [ $@ ] [ $@ ] =>> rx/xs/<o>/<c>	\
+	> | lw 'm/^[^:]+:$'
+	> | lw 's/(.*)[.]h:/\1.o/g'		\
+	> | lw 's/<\\>//g'						\
+	> | lw 's/^ //g'
+}
+
 # compile .o from .c
 [
 	[ $SRCDIR ] =>> lsr/xs/<c>/<o>/y

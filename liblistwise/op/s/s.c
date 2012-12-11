@@ -72,12 +72,13 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	for(x = 0; x < ls->s[0].l; x++)
 	{
 		int go = 1;
-		if(ls->sel.l)
+		if(!ls->sel.all)
 		{
-			if(ls->sel.sl <= (x/8))
-				break;
-
-			go = (ls->sel.s[x/8] & (0x01 << (x%8)));
+			go = 0;
+			if(ls->sel.sl > (x/8))
+			{
+				go = ls->sel.s[x/8] & (0x01 << (x%8));
+			}
 		}
 
 		if(go && ls->s[0].s[x].type == 0)
