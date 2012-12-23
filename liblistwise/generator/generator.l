@@ -1,8 +1,8 @@
 %{
 	#include <stdio.h>
 
-	#include "generator.def.h"
-	#include "generator.tab.h"
+	#include "generator/generator.def.h"
+	#include "generator/generator.tab.h"
 
 	void generator_yyerror(void* scanner, parse_param* pp, char const* err);
 

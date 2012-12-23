@@ -42,6 +42,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		int go = 1;
 		if(!ls->sel.all)
 		{
+			go = 0;
 			if(ls->sel.sl > (x/8))
 			{
 				go = (ls->sel.s[x/8] & (0x01 << (x%8)));

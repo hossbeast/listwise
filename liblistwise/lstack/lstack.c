@@ -5,7 +5,7 @@
 
 #include "listwise/internal.h"
 
-#include "generator.tab.h"
+#include "generator/generator.tab.h"
 
 #include "xmem.h"
 #include "xstring.h"

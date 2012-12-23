@@ -1,8 +1,8 @@
 #include "listwise/internal.h"
 
-#include "generator.def.h"
-#include "generator.tab.h"
-#include "generator.lex.h"
+#include "generator/generator.def.h"
+#include "generator/generator.tab.h"
+#include "generator/generator.lex.h"
 
 #include "re.h"
 
