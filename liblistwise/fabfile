@@ -133,6 +133,7 @@ all : [ $LIB $OPLIST ]
 
 install : [ /../all ]
 {
+	sudo su
 	install -d																				[ $DESTDIR / $LIBDIR ] =>> j
 	install	[ $SRCDIR / $LIB ] =>> j									[ $DESTDIR / $LIBDIR / $LIB .0.1 ] =>> j
 	ln -vfs [ $LIB .0.1 ] =>> j 											[ $DESTDIR / $LIBDIR / $LIB ] =>> j

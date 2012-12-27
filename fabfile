@@ -20,10 +20,6 @@ OBJECTS	= [ $SRCDIR ] =>> ls/xs/<c>/<o>/y
 #
 [ $NAME ] : [ $OBJECTS ]
 
-# main uses args
-[ main.o ] : [ args.h ]
-[ args.o ] : [ args.h ]
-
 #
 # formulas
 #
@@ -32,7 +28,17 @@ OBJECTS	= [ $SRCDIR ] =>> ls/xs/<c>/<o>/y
 	[ $CC $CFLAGS -o $@ ] [ $@ ] =>> rx/aneed/xm/<o>/ss/u [ $LFLAGS ]
 }
 
+#
+# discovery
+#
+[ $OBJECTS ] ~
+{
+	[ $CC $CFLAGS ] -MM -MP -MG -MT [ $@ ] [ $@ ] =>> rx/xs/<o>/<c>	| gcc-dep
+}
+
+#
 # make .o's
+#
 [ $OBJECTS ] =>> dj/shift :: [ $< ] =>> rx/xs/<o>/<c>
 {
 	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
