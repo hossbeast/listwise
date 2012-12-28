@@ -8,6 +8,7 @@
 #include <listwise/operator.h>
 
 #include "control.h"
+#include "xmem.h"
 
 /*
 
@@ -41,8 +42,7 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	char ss[256];
-
+	char * ss = 0;
 	int x;
 	for(x = 0; x < ls->s[0].l; x++)
 	{
@@ -57,7 +57,8 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 		if(go && ls->s[0].s[x].type == 0)
 		{
-			if(realpath(ls->s[0].s[x].s, ss))
+			xfree(&ss);
+			if((ss = realpath(ls->s[0].s[x].s, 0)))
 			{
 				fatal(lstack_write
 					, ls
@@ -75,5 +76,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		}
 	}
 
+	free(ss);
 	return 1;
 }
