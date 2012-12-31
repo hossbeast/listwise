@@ -83,6 +83,10 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 						else
 							fatal(lstack_write, ls, 0, x + i, r[i], rls[i]);
 					}
+
+					free(r);
+					free(rtypes);
+					free(rls);
 				}
 			}
 		}

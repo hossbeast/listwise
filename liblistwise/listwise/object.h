@@ -52,6 +52,19 @@ typedef struct listwise_object
 	//  access a property on an object of this type. usually this means replace the
 	//  instance of the object with 1 or more other objects and/or strings
 	//
+	// DETAILS
+	//  *rl is set to the number of entities in the reflected property
+	//  foreach entity in the reflected property;
+	//   if that entity is a string
+	//    - *r[x] is set to a pointer to the string
+	//    - *rls[x] is set to the length of that string
+	//    - *rtypes[x] is ignored
+	//    - the string is immediately copied into internal listwise storage
+	//   if that entity is an object
+	//    - *r[x] is set to a pointer to the object
+	//    - *rls[x] is ignored
+	//    - *rtypes[x] is set 
+	//
 	// PARAMETERS
 	//  o        - pointer to the object
 	//  property - property name
@@ -59,6 +72,8 @@ typedef struct listwise_object
 	//  rtypes   - list of types of length rl
 	//  rls      - list of lengths of length rl
 	//  rl       - number of returned objects/strings
+	//
+	// *r, *rtypes, and *rls are free()'d by the caller after invoking this method
 	//
 	// RETURNS
 	//  0 on error, 1 otherwise
@@ -68,7 +83,7 @@ typedef struct listwise_object
 	/// destroy
 	//
 	// SUMMARY
-	//  invoked just prior to freeing the object and forgetting the associated pointer
+	//  invoked just prior to forgetting the pointer to an object of this type
 	//
 	void (*destroy)(void* o);
 } listwise_object;

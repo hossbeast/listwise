@@ -5,7 +5,7 @@ LIB			= [ liblistwise.so ]		# name of the library
 CC			= [ gcc ]
 FLEX		= [ flex ]
 BISON		= [ bison ]
-CFLAGS	= [ -m64 -O3 -Werror -D_GNU_SOURCE -fPIC [ $# ] =>> lsr/xm/<h>/rp/dn/ss/u/s/^/-I ]
+CFLAGS	= [ -m64 -O3 -g -Werror -D_GNU_SOURCE -fPIC [ $# ] =>> lsr/xm/<h>/rp/dn/ss/u/s/^/-I ]
 LFLAGS	= [ -lpcre -ldl -shared -Wl,--version-script=exports [ -Wl,-soname, $LIB ] =>> j ]
 
 SRCDIR	= [ $# ] 								# directory this makefile resides in
@@ -153,9 +153,9 @@ uninstall
 
 clean
 {
-	find [ $SRCDIR ] -name *.o -delete
-	find [ $SRCDIR ] -name *.so -delete
-	find [ $SRCDIR ] -name *.lex.* -delete
-	find [ $SRCDIR ] -name *.tab.* -delete
+	find [ $SRCDIR ] -name '*.o' -delete
+	find [ $SRCDIR ] -name '*.so' -delete
+	find [ $SRCDIR ] -name '*.lex.*' -delete
+	find [ $SRCDIR ] -name '*.tab.*' -delete
 	find [ $SRCDIR ] -name exports -delete
 }

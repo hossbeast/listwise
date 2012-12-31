@@ -50,5 +50,7 @@ void object_teardown()
 	for(x = 0; x < object_registry.l; x++)
 		free(object_registry.e[x]->string_property);
 
+	free(object_registry.e);
+
 	idx_free(object_registry.by_type);
 }
