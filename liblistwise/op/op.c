@@ -30,20 +30,20 @@ int op_load(char* path)
 
 	if((sym = dlopen(path, RTLD_NOW | RTLD_GLOBAL)) == 0)
 	{
-		fprintf(stderr, "FAILED TO LOAD: %s [%s]\n", path, dlerror());
+		dprintf(listwise_err_fd, "FAILED TO LOAD: %s [%s]\n", path, dlerror());
 /* I guess this segfaults ...
 		dlclose(sym);
 */
 	}
 	else if((op = dlsym(sym, "op_desc")) == 0)
 	{
-		fprintf(stderr, "FAILED TO LOAD: %s\n", path);
+		dprintf(listwise_err_fd, "FAILED TO LOAD: %s\n", path);
 		dlclose(sym);
 	}
 	else
 	{
 #if 0
-		fprintf(stderr, "-> LOADED : %s\n", path);
+		dprintf(listwise_err_fd, "-> LOADED : %s\n", path);
 #endif
 
 		if(g_ops_a == g_ops_l)
@@ -61,7 +61,7 @@ int op_load(char* path)
 		g_ops[g_ops_l++] = op;
 	}
 
-	return 1;
+	finally : coda;
 }
 
 void op_sort()

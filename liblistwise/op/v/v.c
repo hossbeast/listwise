@@ -55,5 +55,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			fatal(lstack_last_set, ls, x);
 	}
 
-	return 1;
+	finally : coda;
 }

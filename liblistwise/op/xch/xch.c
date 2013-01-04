@@ -40,7 +40,7 @@ int op_validate(operation* o)
 			fail("x -- first argument should be i64");
 	}
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -63,4 +63,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	}
 
 	fatal(lstack_sel_all, ls);
+
+	finally : coda;
 }

@@ -83,8 +83,9 @@ static int listing(lstack* ls, char * s)
 		dprintf(listwise_err_fd, "opendir('%s')=[%d][%s]\n", s, errno, strerror(errno));
 	}
 
+finally:
 	closedir(dd);
-	return 1;
+coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -118,5 +119,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	// if anything was selected, its now used up
 	fatal(lstack_sel_all, ls);
 
-	return 1;
+	finally : coda;
 }

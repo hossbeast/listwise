@@ -130,4 +130,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	// selection
 	fatal(lstack_sel_all, ls);
 	fatal(lstack_last_set, ls, ls->s[0].l - 1);
+
+	finally : coda;
 }

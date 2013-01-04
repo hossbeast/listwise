@@ -31,7 +31,7 @@ int op_validate(operation* o)
 	if(o->argsl && o->args[0]->itype != ITYPE_I64)
 		fail("pop -- expected first argument : i64");
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -46,5 +46,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	for(x = 0; x < N; x++)
 		fatal(lstack_pop, ls);
 
-	return 1;
+	finally : coda;
 }

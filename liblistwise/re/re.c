@@ -37,7 +37,7 @@ int API re_compile(char* s, struct re* re, char* mod)
 		fail("pcre: '%s', err: [%d][%s]", s, r, LIBPCRE_ERR_STR(r));
 	}
 
-	return 1;
+	finally : coda;
 }
 
 int API re_exec(struct re* re, char* s, int l, int o, int** ovec, int* ovec_len)
@@ -78,5 +78,5 @@ int API re_exec(struct re* re, char* s, int l, int o, int** ovec, int* ovec_len)
 	}
 #endif
 
-	return 1;
+	finally : coda;
 }

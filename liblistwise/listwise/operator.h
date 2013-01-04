@@ -138,6 +138,9 @@ int lstack_appendf(lstack* const restrict ls, int x, int y, const char* const re
 int lstack_write(lstack* const restrict ls, int x, int y, const char* const restrict s, int l)
 	__attribute__((nonnull));
 
+int lstack_write_alt(lstack* const restrict ls, int x, int y, const char* const restrict s, int l)
+	__attribute__((nonnull));
+
 /// lstack_writef
 //
 // write text to the entry at x:y using printf-style args
@@ -229,6 +232,12 @@ int lstack_string(lstack* const restrict ls, int x, int y, char ** r, int * rl);
 //
 char* lstack_getstring(lstack* const restrict ls, int x, int y);
 
+/// allocate
+//
+//
+//
+int lstack_allocate(lstack* const restrict ls, int x, int y, int z);
+
 /// ensure
 //
 // ensure stack/list allocation up to the specified dimensions
@@ -245,9 +254,37 @@ int lstack_ensure(lstack* const restrict ls, int x, int y, int z);
 
 /// lstack_move
 //
-// move entry at bx:by to ax:ay, decrease length of bx by one
+// SUMMARY
+//  move the entry at bx:by to position ax:ay
+//
+// DETAILS
+//  1. copy ax:ay
+//  2. set ax:ay = bx:by
+//  3. copy entries following bx:by down by 1, overwriting it
+//  4. place the original ax:ay at the end of ls->s[bx]
+//  5. ls->s[bx].l--
+//
+// RETURNS
+//  lstack_move returns 1
 //
 int lstack_move(lstack* const restrict ls, int ax, int ay, int bx, int by)
+	__attribute__((nonnull));
+
+/// lstack_delete
+//
+// SUMMARY
+//  delete the entry at position x:y
+//
+// DETAILS
+//  1. copy x:y
+//  2. copy entries following x:y down by 1, overwriting it
+//  3. place the original x:y at the end of ls->s[x]
+//  4. ls->s[x].l--
+//
+// RETURNS
+//  lstack_delete returns 1
+//
+int lstack_delete(lstack * const restrict ls, int x, int y)
 	__attribute__((nonnull));
 
 /// sel_clear
@@ -330,5 +367,8 @@ int re_compile(char* s, struct re* re, char* mod);
 //		}
 //
 int re_exec(struct re* re, char* s, int l, int o, int** ovec, int* ovec_len);
+
+void lstack_sanity(lstack * const restrict ls)
+	__attribute__((nonnull));
 
 #endif

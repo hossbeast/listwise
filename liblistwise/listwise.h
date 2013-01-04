@@ -77,6 +77,12 @@ typedef struct lstack
 //
 int listwise_exec(char* s, int l, char** init, int* initls, int initl, lstack** r);
 
+/// lstack_create
+//
+// allocate an lstack
+//
+int lstack_create(lstack **);
+
 /// lstack_free
 //
 // free lstack with free-like semantics

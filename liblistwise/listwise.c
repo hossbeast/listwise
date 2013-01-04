@@ -23,5 +23,5 @@ int listwise_exec(char* s, int l, char** init, int* initls, int initl, lstack** 
 	generator_free(g);
 	generator_parser_free(p);
 
-	return 1;
+	finally : coda;
 }

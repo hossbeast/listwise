@@ -38,5 +38,5 @@ int API lstack_last_set(lstack* const restrict ls, int y)
 
 	ls->last.s[y/8] |= (0x01 << y%8);
 
-	return 1;
+	finally : coda;
 }

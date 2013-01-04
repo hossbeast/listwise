@@ -24,7 +24,7 @@ static int op_validate(operation* o);
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .optype					= LWOP_SELECTION_RESET
+	  .optype				= LWOP_SELECTION_RESET
 	, .op_validate	= op_validate
 	, .op_exec			= op_exec
 	, .desc					= "extract selected items into a new list"
@@ -37,17 +37,20 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
+	// create a new list at index 0
 	fatal(lstack_unshift, ls);
 
 	if(ls->sel.all || ls->sel.l == ls->s[1].l)
 	{
+		// in this case, just swap the current list with the new, empty list
 		typeof(ls->s[0]) T = ls->s[0];
 		ls->s[0] = ls->s[1];
 		ls->s[1] = T;
 	}
 	else
 	{
-		fatal(lstack_ensure, ls, 0, ls->s[1].l - ls->sel.l - 1, -1);
+		// ensure allocation in the new list @ [0]
+		fatal(lstack_allocate, ls, 0, ls->s[1].l - ls->sel.l - 1, -1);
 
 		int i = 0;
 		int x;
@@ -55,26 +58,12 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		{
 			if((ls->sel.sl <= (x/8)) || (ls->sel.s[x/8] & (0x01 << (x%8))) == 0)
 			{
-				ls->s[0].s[ls->s[1].l - ls->sel.l - 1 - i] = ls->s[1].s[x];
-				ls->s[0].t[ls->s[1].l - ls->sel.l - 1 - i] = ls->s[1].t[x];
-				i++;
-
-				memmove(
-						&ls->s[1].s[x]
-					, &ls->s[1].s[x+1]
-					, (ls->s[1].l - x - 1) * sizeof(ls->s[0].s[0])
-				);
-				memmove(
-						&ls->s[1].t[x]
-					, &ls->s[1].t[x+1]
-					, (ls->s[1].l - x - 1) * sizeof(ls->s[0].t[0])
-				);
+				fatal(lstack_move, ls, 0, ls->s[1].l - ls->sel.l - 1 - i, 1, x);
 			}
 		}
-
-		ls->s[1].l -= i;
-		ls->s[1].a -= i;
 	}
 
 	fatal(lstack_sel_all, ls);
+
+	finally : coda;
 }

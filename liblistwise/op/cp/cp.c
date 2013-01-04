@@ -39,7 +39,7 @@ int op_validate(operation* o)
 	if(o->argsl >= 1 && o->args[0]->itype != ITYPE_I64)
 		fail("cp - first argument should be i64");
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -58,7 +58,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	{
 		for(x = 0; x < ls->s[0].l; x++)
 		{
-			int go = 1;
 			if(ls->sel.sl <= (x/8))	// could not be selected
 				break;
 
@@ -105,15 +104,23 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 				ls->s[0].s[x+y] = ls->s[0].s[x];
 				if(ls->s[0].s[x+y].s)
 				{
-					fatal(xmalloc, &ls->s[0].s[x+y].s, ls->s[0].s[x].l + 1);
-					memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, ls->s[0].s[x].l);
+					if(ls->s[0].s[x+y].type)
+					{
+						fatal(xmalloc, &ls->s[0].s[x+y].s, sizeof(void*));
+						memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, sizeof(void*));
+					}
+					else
+					{
+						fatal(xmalloc, &ls->s[0].s[x+y].s, ls->s[0].s[x].l + 1);
+						memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, ls->s[0].s[x].l);
+					}
 				}
 
 				ls->s[0].t[x+y] = ls->s[0].t[x];
 				if(ls->s[0].t[x+y].s)
 				{
 					fatal(xmalloc, &ls->s[0].t[x+y].s, ls->s[0].t[x].l + 1);
-					memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, ls->s[0].s[x].l);
+					memcpy(ls->s[0].t[x+y].s, ls->s[0].t[x].s, ls->s[0].t[x].l);
 				}
 			}
 
@@ -146,5 +153,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		}
 	}
 
-	return 1;
+	finally : coda;
 }

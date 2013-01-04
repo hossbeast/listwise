@@ -31,7 +31,7 @@ int op_validate(operation* o)
 	if(o->argsl && o->args[0]->itype != ITYPE_I64)
 		fail("shift -- expected first argument : i64");
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -49,5 +49,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	// if anything was selected, its now used up
 	fatal(lstack_sel_all, ls);
 
-	return 1;
+	finally : coda;
 }

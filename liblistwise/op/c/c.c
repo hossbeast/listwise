@@ -38,7 +38,7 @@ int op_validate(operation* o)
 			fail("c -- first argument should be i64");
 	}
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -56,5 +56,6 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		fatal(lstack_merge, ls, 0, x);
 
 	fatal(lstack_sel_all, ls);
-	return 1;
+
+	finally : coda;
 }

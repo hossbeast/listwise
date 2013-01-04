@@ -14,18 +14,32 @@
 **
 **  use the lstack_* api's in listwise/object.h add instances of the object to an lstack
 **
-**  (see the a(apply) operator)
+**  these operators use the object api
+**		- rx (reflect)
+**
+**  object instances are manipulated by traditional operators that do not modify lstack
+**  entries through the object's string_property. This specifies a property which is to
+**  be accessed on instances of the object to get a string representation of the instance
 **
 */
 
 typedef struct listwise_object
 {
+	/// type
+	//
 	// unique type identifier
+	//
 	uint8_t type;
 
-	// active propery for default string coercion on object entries of this type
-	//  default - 0
-	//  see the fx operator
+	/// string_property
+	//
+	// SUMMARY
+	//  active propery for default string coercion on object entries of this type
+	//  at listwise_register_object time, if this value is not null, it should be
+	//  set to a malloc()'d string, not a string constant
+	//
+	// DEFAULT
+	//  0
 	//
 	char* string_property;
 
@@ -54,16 +68,17 @@ typedef struct listwise_object
 	//
 	// DETAILS
 	//  *rl is set to the number of entities in the reflected property
-	//  foreach entity in the reflected property;
+	//  foreach entity in the reflected property:
 	//   if that entity is a string
 	//    - *r[x] is set to a pointer to the string
 	//    - *rls[x] is set to the length of that string
 	//    - *rtypes[x] is ignored
-	//    - the string is immediately copied into internal listwise storage
+	//    - *rls[x] bytes are immediately copied from *r[x] into the lstack
 	//   if that entity is an object
 	//    - *r[x] is set to a pointer to the object
 	//    - *rls[x] is ignored
-	//    - *rtypes[x] is set 
+	//    - *rtypes[x] is set to the typeid of the listwise_register'd object
+	//    - sizeof(void*) bytes are immediately copied from *r[x] into the lstack
 	//
 	// PARAMETERS
 	//  o        - pointer to the object
@@ -73,7 +88,7 @@ typedef struct listwise_object
 	//  rls      - list of lengths of length rl
 	//  rl       - number of returned objects/strings
 	//
-	// *r, *rtypes, and *rls are free()'d by the caller after invoking this method
+	// *r, *rtypes, and *rls are free()'d by the caller (liblistwise) after invoking this method
 	//
 	// RETURNS
 	//  0 on error, 1 otherwise
@@ -129,6 +144,8 @@ int listwise_lookup_object(uint8_t type, listwise_object ** obj);
 // place an object instance at x:y
 //
 int lstack_obj_write(lstack* const restrict ls, int x, int y, const void* const restrict o, uint8_t type)
+	__attribute__((nonnull));
+int lstack_obj_write_alt(lstack* const restrict ls, int x, int y, const void* const restrict o, uint8_t type)
 	__attribute__((nonnull));
 
 /// lstack_obj_add

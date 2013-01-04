@@ -38,7 +38,7 @@ int op_validate(operation* o)
 	if(o->argsl > 2)
 		fail("xs -- arguments : %d", o->argsl);
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -112,5 +112,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		}
 	}
 
-	return 1;
+	finally : coda;
 }

@@ -28,6 +28,8 @@ int API listwise_register_object(uint8_t type, listwise_object * def)
 		, INDEX_UNIQUE | INDEX_NUMERIC | INDEX_DEREF
 		, &object_registry.by_type
 	);
+
+	finally : coda;
 }
 
 int API listwise_enumerate_objects(listwise_object *** list, int * list_len)

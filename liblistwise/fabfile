@@ -60,102 +60,102 @@ all : [ $LIB $OPLIST ]
 	[ -Wl,-soname, [ $@ ] =>> rx/bn/fn .so ] =>> j
 }
 
+##
+## dependency discovery
+##
 #
-# dependency discovery
-#
-
 # c files
 [ $SRCDIR ] =>> lsr/xm/<c>/1 ~
 {
-	[ $CC $CFLAGS ] -MM -MP -MG [ $@ ] | gcc-dep [ $@ ] =>> rx/xs/<c>/<o>
+	[ $CC $CFLAGS ] -MM -MP -MG [ $@ ] | gcc-dep [ $@ ] =>> rx/xs/<o>
 }
-
-# l files
-[ $SRCDIR ] =>> lsr/xm/<l>/1 ~
-{
-	[ $FLEX -t $@ ] | [ $CC $CFLAGS ] -MM -MP -MG -xc - | gcc-dep [ $@ ] =>> rx/xs/<l>/lex.o
-}
-
-# y files
-[ $SRCDIR ] =>> lsr/xm/<y>/1 ~
-{
-	  [ $BISON --warnings=error -o /dev/stdout $@ ]		\
-	| [ $CC $CFLAGS ] -MM -MP -MG -xc -								\
-	| gcc-dep [ $@ ] =>> rx/xs/<y>/tab.o
-}
-
+#
+## l files
+#[ $SRCDIR ] =>> lsr/xm/<l>/1 ~
+#{
+#	[ $FLEX -t $@ ] | [ $CC $CFLAGS ] -MM -MP -MG -xc - | gcc-dep [ $@ ] =>> rx/xs/<l>/lex.o
+#}
+#
+## y files
+#[ $SRCDIR ] =>> lsr/xm/<y>/1 ~
+#{
+#	  [ $BISON --warnings=error -o /dev/stdout $@ ]		\
+#	| [ $CC $CFLAGS ] -MM -MP -MG -xc -								\
+#	| gcc-dep [ $@ ] =>> rx/xs/<y>/tab.o
+#}
+#
 # compile .o from .c
 [ $SRCDIR ] =>> lsr/xs/<c>/<o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<c>
 {
 	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
 }
-
-# compile .o from .lex.c
-[ $SRCDIR ] =>> lsr/xs/<l>/<lex.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<lex.c>
-{
-	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
-}
-
-# compile .o from .tab.c
-[ $SRCDIR ] =>> lsr/xs/<y>/<tab.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<tab.c>
-{
-	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
-}
-
-# flex - create .lex.c and .lex.h from a .l
-[ $SRCDIR ] =>> lsr/xs/<l>/lex.c/y/v/d/cp/u/xs/lex.c/lex.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/<l>/ss/u
-{
-	[ $FLEX -o [ $@ ] =>> h/1/1/rx ]									\
-	[ --header-file= [ $@ ] =>> h/0/1/rx ] =>> j			\
-	[ $@ ] =>> rx/ineed/xm/<l>/ss/u
-}
-
-# bison - create .tab.c and .tab.h from a .y
-[ $SRCDIR ] =>> lsr/xs/<y>/tab.c/y/v/d/cp/u/xs/tab.c/tab.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/<y>/ss/u
-{
-	[ $BISON --warnings=error -o ]		\
-	[ $@ ] =>> h/1/1									\
-	[ -d ]														\
-	[ $@ ] =>> rx/ineed/xm/<y>/ss/u
-}
-
-##
-## tasks
-##
-
-install : [ /../all ]
-{
-	install -d																				[ $DESTDIR / $LIBDIR ] =>> j
-	install	[ $SRCDIR / $LIB ] =>> j									[ $DESTDIR / $LIBDIR / $LIB .0.1 ] =>> j
-	ln -vfs [ $LIB .0.1 ] =>> j 											[ $DESTDIR / $LIBDIR / $LIB ] =>> j
-	install -d																				[ $DESTDIR / $INCDIR ] =>> j
-	install -d																				[ $DESTDIR / $INCDIR /listwise ] =>> j
-	install [ $SRCDIR /listwise.h	] =>> j							[ $DESTDIR / $INCDIR /listwise.h ] =>> j
-	install [ $SRCDIR /listwise/operator.h ] =>> j		[ $DESTDIR / $INCDIR /listwise/operator.h ] =>> j
-	install [ $SRCDIR /listwise/generator.h	] =>> j		[ $DESTDIR / $INCDIR /listwise/generator.h ] =>> j
-	install [ $SRCDIR /listwise/ops.h ] =>> j					[ $DESTDIR / $INCDIR /listwise/ops.h ] =>> j
-	install [ $SRCDIR /listwise/lstack.h ] =>> j			[ $DESTDIR / $INCDIR /listwise/lstack.h ] =>> j
-	install [ $SRCDIR /listwise/object.h ] =>> j			[ $DESTDIR / $INCDIR /listwise/object.h ] =>> j
-
-	install -d																				[ $DESTDIR / $DLIBDIR /listwise ] =>> j
-	for x in [ $OPLIST ]; do \
-		install $x																			[ $DESTDIR / $DLIBDIR /listwise ] =>> j
-	done
-}
-
-uninstall
-{
-	rm -f																							[ $DESTDIR / $LIBDIR  / $LIB .0.1 ] =>> j
-	rm -f																							[ $DESTDIR / $LIBDIR  / $LIB ] =>> j
-	rm -rf																						[ $DESTDIR / $DLIBDIR /listwise ] =>> j
-	rm -f																							[ $DESTDIR / $INCDIR  /listwise.h ] =>> j
-}
-
-clean
-{
-	find [ $SRCDIR ] -name '*.o' -delete
-	find [ $SRCDIR ] -name '*.so' -delete
-	find [ $SRCDIR ] -name '*.lex.*' -delete
-	find [ $SRCDIR ] -name '*.tab.*' -delete
-	find [ $SRCDIR ] -name exports -delete
-}
+#
+## compile .o from .lex.c
+#[ $SRCDIR ] =>> lsr/xs/<l>/<lex.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<lex.c>
+#{
+#	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
+#}
+#
+## compile .o from .tab.c
+#[ $SRCDIR ] =>> lsr/xs/<y>/<tab.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<tab.c>
+#{
+#	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
+#}
+#
+## flex - create .lex.c and .lex.h from a .l
+#[ $SRCDIR ] =>> lsr/xs/<l>/lex.c/y/v/d/cp/u/xs/lex.c/lex.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/<l>/ss/u
+#{
+#	[ $FLEX -o [ $@ ] =>> h/1/1/rx ]									\
+#	[ --header-file= [ $@ ] =>> h/0/1/rx ] =>> j			\
+#	[ $@ ] =>> rx/ineed/xm/<l>/ss/u
+#}
+#
+## bison - create .tab.c and .tab.h from a .y
+#[ $SRCDIR ] =>> lsr/xs/<y>/tab.c/y/v/d/cp/u/xs/tab.c/tab.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/<y>/ss/u
+#{
+#	[ $BISON --warnings=error -o ]		\
+#	[ $@ ] =>> h/1/1									\
+#	[ -d ]														\
+#	[ $@ ] =>> rx/ineed/xm/<y>/ss/u
+#}
+#
+###
+### tasks
+###
+#
+#install : [ /../all ]
+#{
+#	install -d																				[ $DESTDIR / $LIBDIR ] =>> j
+#	install	[ $SRCDIR / $LIB ] =>> j									[ $DESTDIR / $LIBDIR / $LIB .0.1 ] =>> j
+#	ln -vfs [ $LIB .0.1 ] =>> j 											[ $DESTDIR / $LIBDIR / $LIB ] =>> j
+#	install -d																				[ $DESTDIR / $INCDIR ] =>> j
+#	install -d																				[ $DESTDIR / $INCDIR /listwise ] =>> j
+#	install [ $SRCDIR /listwise.h	] =>> j							[ $DESTDIR / $INCDIR /listwise.h ] =>> j
+#	install [ $SRCDIR /listwise/operator.h ] =>> j		[ $DESTDIR / $INCDIR /listwise/operator.h ] =>> j
+#	install [ $SRCDIR /listwise/generator.h	] =>> j		[ $DESTDIR / $INCDIR /listwise/generator.h ] =>> j
+#	install [ $SRCDIR /listwise/ops.h ] =>> j					[ $DESTDIR / $INCDIR /listwise/ops.h ] =>> j
+#	install [ $SRCDIR /listwise/lstack.h ] =>> j			[ $DESTDIR / $INCDIR /listwise/lstack.h ] =>> j
+#	install [ $SRCDIR /listwise/object.h ] =>> j			[ $DESTDIR / $INCDIR /listwise/object.h ] =>> j
+#
+#	install -d																				[ $DESTDIR / $DLIBDIR /listwise ] =>> j
+#	for x in [ $OPLIST ]; do \
+#		install $x																			[ $DESTDIR / $DLIBDIR /listwise ] =>> j
+#	done
+#}
+#
+#uninstall
+#{
+#	rm -f																							[ $DESTDIR / $LIBDIR  / $LIB .0.1 ] =>> j
+#	rm -f																							[ $DESTDIR / $LIBDIR  / $LIB ] =>> j
+#	rm -rf																						[ $DESTDIR / $DLIBDIR /listwise ] =>> j
+#	rm -f																							[ $DESTDIR / $INCDIR  /listwise.h ] =>> j
+#}
+#
+#clean
+#{
+#	find [ $SRCDIR ] -name '*.o' -delete
+#	find [ $SRCDIR ] -name '*.so' -delete
+#	find [ $SRCDIR ] -name '*.lex.*' -delete
+#	find [ $SRCDIR ] -name '*.tab.*' -delete
+#	find [ $SRCDIR ] -name exports -delete
+#}

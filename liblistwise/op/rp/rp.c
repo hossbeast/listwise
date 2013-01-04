@@ -76,6 +76,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		}
 	}
 
+finally:
 	free(ss);
-	return 1;
+coda;
 }

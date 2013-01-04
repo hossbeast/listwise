@@ -42,7 +42,7 @@ int op_validate(operation* o)
 	if(o->argsl >= 2 && o->args[1]->itype != ITYPE_I64)
 		fail("w - second argument should be i64");
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -94,5 +94,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		}
 	}
 
-	return 1;
+	finally : coda;
 }

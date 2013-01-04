@@ -26,9 +26,9 @@ OPERATION
    3.1. push an empty list onto the stack
    3.2. remove N items from top list into the new list
 
-AFTERWARDS, the stack looks like this
+AFTERWARDS, the stack of lists looks like this
 
-0)      remainder list - unselected items in list 0 when we started
+0)      remainder list - unselected items in list 0 when we started (may be empty)
 1 .. n) newly-created lists
 n+1 ..) contents of the stack beyond list 0 when we started
 
@@ -49,7 +49,7 @@ int op_validate(operation* o)
 	if(o->argsl >= 1 && o->args[0]->itype != ITYPE_I64)
 		fail("dj - first argument should be i64");
 
-	return 1;
+	finally : coda;
 }
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
@@ -87,6 +87,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 				fatal(lstack_push, ls);
 			}
 
+			fatal(lstack_ensure, ls, ls->l - 1, N - j - 1, 0);
 			fatal(lstack_move, ls, ls->l - 1, N - j - 1, 0, x);
 
 			j = (j + 1) % N;
@@ -152,5 +153,5 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	// selection reset
 	fatal(lstack_sel_all, ls);
 
-	return 1;
+	finally : coda;
 }

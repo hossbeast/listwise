@@ -56,6 +56,8 @@ static int init()
 	closedir(dd);
 
 	op_sort();
+
+	finally : coda;
 }
 
 void __attribute__((constructor)) list_initialize()

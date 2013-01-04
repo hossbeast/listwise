@@ -32,6 +32,11 @@ operator op_desc = {
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
+	void **		r = 0;
+	uint8_t *	rtypes = 0;
+	int *			rls = 0;
+	int				rl = 0;
+
 	char* prop = 0;
 	if(o->argsl)
 		prop = o->args[0]->s;
@@ -58,39 +63,37 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 
 				if(def)
 				{
-					void **		r = 0;
-					uint8_t *	rtypes = 0;
-					int *			rls = 0;
-					int				rl = 0;
+					xfree(&r);
+					xfree(&rtypes);
+					xfree(&rls);
 
+					// call the reflection method on the appropriate object
 					fatal(def->reflect, *(void**)ls->s[0].s[x].s, prop, &r, &rtypes, &rls, &rl);
 
-					// make room
-					int l = ls->s[0].l;
-					fatal(lstack_ensure, ls, 0, x + rl - 1, sizeof(void*));
+					// delete the entry just reflected upon
+					fatal(lstack_delete, ls, 0, x);
 
-					memmove(
-						  &ls->s[0].s[x + rl]
-						, &ls->s[0].s[x + 1]
-						, (l - x - 1) * sizeof(ls->s[0].s[0])
-					);
-
+					// write new entries to the end of the stack
 					int i;
 					for(i = 0; i < rl; i++)
 					{
 						if(rtypes && rtypes[i])
+						{
 							fatal(lstack_obj_write, ls, 0, x + i, r[i], rtypes[i]);
+						}
 						else
+						{
 							fatal(lstack_write, ls, 0, x + i, r[i], rls[i]);
+						}
 					}
-
-					free(r);
-					free(rtypes);
-					free(rls);
 				}
 			}
 		}
 	}
 
-	return 1;
+finally:
+	free(r);
+	free(rtypes);
+	free(rls);
+coda;
 }
