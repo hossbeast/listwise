@@ -50,7 +50,7 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	else
 	{
 		// ensure allocation in the new list @ [0]
-		fatal(lstack_allocate, ls, 0, ls->s[1].l - ls->sel.l - 1, -1);
+		fatal(lstack_ensure, ls, 0, ls->s[1].l - ls->sel.l - 1, -1);
 
 		int i = 0;
 		int x;

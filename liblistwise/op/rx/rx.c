@@ -25,7 +25,7 @@ OPERATION
 static int op_exec(operation*, lstack*, int**, int*);
 
 operator op_desc = {
-	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_RESET | LWOP_ARGS_CANHAVE
+	  .optype				= LWOP_SELECTION_READ | LWOP_SELECTION_WRITE | LWOP_ARGS_CANHAVE
 	, .op_exec			= op_exec
 	, .desc					= "replace object entries with their reflected properties"
 };
@@ -37,11 +37,16 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	int *			rls = 0;
 	int				rl = 0;
 
+	int *			last = 0;
+	int				lastl = 0;
+	int				lasta = 0;
+
 	char* prop = 0;
 	if(o->argsl)
 		prop = o->args[0]->s;
 
 	int x;
+	int i;
 	for(x = ls->s[0].l - 1; x >= 0; x--)
 	{
 		int go = 1;
@@ -54,46 +59,66 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 			}
 		}
 
-		if(go)
+		if(go && ls->s[0].s[x].type)
 		{
-			if(ls->s[0].s[x].type)
+			listwise_object * def = 0;
+			fatal(listwise_lookup_object, ls->s[0].s[x].type, &def);
+
+			if(def)
 			{
-				listwise_object * def = 0;
-				fatal(listwise_lookup_object, ls->s[0].s[x].type, &def);
+				xfree(&r);
+				xfree(&rtypes);
+				xfree(&rls);
 
-				if(def)
+				// call the reflection method on the appropriate object
+				fatal(def->reflect, *(void**)ls->s[0].s[x].s, prop, &r, &rtypes, &rls, &rl);
+
+				// delete the entry just reflected upon
+				fatal(lstack_delete, ls, 0, x);
+
+				for(i = 0; i < lastl; i++)
+					last[i]--;
+
+				// displace rl entries at 0:x so we can write to them
+				fatal(lstack_displace, ls, 0, x, rl);
+
+				for(i = 0; i < lastl; i++)
+					last[i] += rl;
+
+				// write rl new entries starting at x
+				for(i = 0; i < rl; i++)
 				{
-					xfree(&r);
-					xfree(&rtypes);
-					xfree(&rls);
-
-					// call the reflection method on the appropriate object
-					fatal(def->reflect, *(void**)ls->s[0].s[x].s, prop, &r, &rtypes, &rls, &rl);
-
-					// delete the entry just reflected upon
-					fatal(lstack_delete, ls, 0, x);
-
-					// write new entries to the end of the stack
-					int i;
-					for(i = 0; i < rl; i++)
+					if(rtypes && rtypes[i])
 					{
-						if(rtypes && rtypes[i])
-						{
-							fatal(lstack_obj_write, ls, 0, x + i, r[i], rtypes[i]);
-						}
-						else
-						{
-							fatal(lstack_write, ls, 0, x + i, r[i], rls[i]);
-						}
+						fatal(lstack_obj_write_alt, ls, 0, x + i, r[i], rtypes[i]);
 					}
+					else
+					{
+						fatal(lstack_write_alt, ls, 0, x + i, r[i], rls[i]);
+					}
+
+					// reallocate last block, if necessary
+					if(lastl == lasta)
+					{
+						int ns = lasta ?: 10;
+						ns = ns * 2 + ns / 2;
+						fatal(xrealloc, &last, sizeof(*last), ns, lasta);
+						lasta = ns;
+					}
+
+					last[lastl++] = x + i;
 				}
 			}
 		}
 	}
 
+	for(x = 0; x < lastl; x++)
+		fatal(lstack_last_set, ls, last[x]);
+
 finally:
 	free(r);
 	free(rtypes);
 	free(rls);
+	free(last);
 coda;
 }

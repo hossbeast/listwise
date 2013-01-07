@@ -287,6 +287,28 @@ int lstack_move(lstack* const restrict ls, int ax, int ay, int bx, int by)
 int lstack_delete(lstack * const restrict ls, int x, int y)
 	__attribute__((nonnull));
 
+/// lstack_displace
+//
+// SUMMARY
+//  prepare l entries at x:y to receive new writes
+//  these entries should be immediately populated with lstack_write_alt/lstack_obj_write_alt
+//
+// DETAILS
+//	1. ensure s[x] has s[x].l + l allocated entries
+//  2. copy l unused entries from s[x].s[s[x].l]
+//  3. copy l entries x:y -> x:y+l
+//	4. copy l unused entries into x:y
+//  5. s[x].l += l
+//
+// NOTES
+//  no-op when l == 0
+//
+// RETURNS
+//  0 on error, 1 otherwise
+//
+int lstack_displace(lstack * const restrict ls, int x, int y, int l)
+	__attribute__((nonnull));
+
 /// sel_clear
 //
 // clear the selection
@@ -368,7 +390,29 @@ int re_compile(char* s, struct re* re, char* mod);
 //
 int re_exec(struct re* re, char* s, int l, int o, int** ovec, int* ovec_len);
 
-void lstack_sanity(lstack * const restrict ls)
-	__attribute__((nonnull));
+/// listwise_sanity
+//
+// cause lstack_exec* family of functions to perform sanity checks on ls before
+// beginning, after every operator completes, and upon completion
+//
+// if a sanity check fails, further use of ls will cause the program to crash or
+// memory will be lost
+//
+// if a sanity check fails, print error(s) to listwise_err_fd and call exit(1)
+//
+// DEFAULT
+//  0 - no sanity checks
+//
+extern int listwise_sanity;
+
+/// listwise_allocation_seed
+//
+// SUMMARY
+//  initial size for new stack, list, and string allocations
+//
+// DEFAULT
+//  10
+//
+extern int listwise_allocation_seed;
 
 #endif

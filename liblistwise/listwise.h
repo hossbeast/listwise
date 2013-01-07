@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define restrict __restrict
+
 /// list-stack
 //
 // stack of lists of strings
@@ -81,26 +83,42 @@ int listwise_exec(char* s, int l, char** init, int* initls, int initl, lstack** 
 //
 // allocate an lstack
 //
-int lstack_create(lstack **);
+int lstack_create(lstack ** const restrict)
+	__attribute__((nonnull));
 
 /// lstack_free
 //
 // free lstack with free-like semantics
 //
-void lstack_free(lstack*);
+void lstack_free(lstack * const restrict);
 
 /// lstack_xfree
 //
 // free an lstack with xfree-like semantics
 //
-void lstack_xfree(lstack**);
+void lstack_xfree(lstack ** const restrict)
+	__attribute__((nonnull));
+
+/// lstack_deepcopy
+//
+// SUMMARY
+//  create a deep copy of an lstack
+//  selection and last are not copied
+//
+// RETURNS
+//  0 on failure (allocation) and 1 otherwise
+//
+int lstack_deepcopy(lstack * const restrict, lstack ** const restrict)
+	__attribute__((nonnull));
 
 /// listwise_err_fd
 //
 // listwise operators write errors to this fd (ls a nonexistent path, for example)
 //
-// default value : 2
+// DEFAULT
+//  2 - stderr
 //
-int listwise_err_fd;
+extern int listwise_err_fd;
 
+#undef restrict
 #endif

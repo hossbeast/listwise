@@ -2,6 +2,8 @@
 #include "control.h"
 
 int APIDATA listwise_err_fd = 2;
+int APIDATA listwise_sanity = 0;
+int APIDATA listwise_allocation_seed = 10;
 
 int listwise_exec(char* s, int l, char** init, int* initls, int initl, lstack** ls)
 {

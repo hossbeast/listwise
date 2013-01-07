@@ -16,6 +16,37 @@
 // static
 //
 
+typedef struct
+{
+	struct
+	{
+		int l;
+		int a;
+		uint8_t t;
+
+		int x;
+		int y;
+		typeof(((lstack*)0)->s[0].s[0].s[0]) *	s;
+		typeof(((lstack*)0)->s[0].s[0].s[0]) *	o;
+		int ol;
+		int oa;
+	} *																	s_strings;
+	int																	s_stringsl;
+	int																	s_stringsa;
+} sanityblock;
+
+static int sanityblock_create(sanityblock ** const restrict sb)
+	__attribute__((nonnull));
+
+static void sanityblock_free(sanityblock * const restrict sb)
+	__attribute__((nonnull));
+
+static void sanityblock_reset(sanityblock * const restrict sb)
+	__attribute__((nonnull));
+
+static int sanity(lstack * const restrict ls, sanityblock * const restrict sb)
+	__attribute__((nonnull));
+
 /// allocate
 //
 // SUMMARY
@@ -33,7 +64,7 @@ static int allocate(lstack * const restrict ls, int x, int y, int z)
 	{
 		if(ls->a <= x)
 		{
-			int ns = ls->a ?: 10;
+			int ns = ls->a ?: listwise_allocation_seed;
 			while(ns <= x)
 				ns = ns * 2 + ns / 2;
 
@@ -45,7 +76,7 @@ static int allocate(lstack * const restrict ls, int x, int y, int z)
 		{
 			if(ls->s[x].a <= y)
 			{
-				int ns = ls->s[x].a ?: 10;
+				int ns = ls->s[x].a ?: listwise_allocation_seed;
 				while(ns <= y)
 					ns = ns * 2 + ns / 2;
 
@@ -71,7 +102,7 @@ static int allocate(lstack * const restrict ls, int x, int y, int z)
 			{
 				if(ls->s[x].s[y].a <= z)
 				{
-					int ns = ls->s[x].s[y].a ?: 10;
+					int ns = ls->s[x].s[y].a ?: listwise_allocation_seed;
 					while(ns <= z)
 						ns = ns * 2 + ns / 2;
 
@@ -98,14 +129,12 @@ static int ensure(lstack * const restrict ls, int x, int y, int z)
 		// ensure stack has enough lists
 		if(ls->a <= x)
 		{
-			fatal(xrealloc
-				, &ls->s
-				, sizeof(ls->s[0])
-				, x + 1
-				, ls->a
-			);
+			int ns = ls->a ?: listwise_allocation_seed;
+			while(ns <= x)
+				ns = ns * 2 + ns / 2;
 
-			ls->a = x + 1;
+			fatal(xrealloc, &ls->s, sizeof(ls->s[0]), ns, ls->a);
+			ls->a = ns;
 		}
 
 		if(ls->l <= x)
@@ -116,23 +145,17 @@ static int ensure(lstack * const restrict ls, int x, int y, int z)
 			// ensure list has enough strings
 			if(ls->s[x].a <= y)
 			{
+				int ns = ls->s[x].a ?: listwise_allocation_seed;
+				while(ns <= y)
+					ns = ns * 2 + ns / 2;
+				
 				// list of strings
-				fatal(xrealloc	
-					, &ls->s[x].s
-					, sizeof(ls->s[x].s[0])
-					, y + 1
-					, ls->s[x].a
-				);
+				fatal(xrealloc, &ls->s[x].s, sizeof(ls->s[x].s[0]), ns, ls->s[x].a);
 
 				// list of tmp space
-				fatal(xrealloc
-					, &ls->s[x].t
-					, sizeof(ls->s[x].t[0])
-					, y + 1
-					, ls->s[x].a
-				);
+				fatal(xrealloc, &ls->s[x].t, sizeof(ls->s[x].t[0]), ns, ls->s[x].a);
 
-				ls->s[x].a = y + 1;
+				ls->s[x].a = ns;
 			}
 
 			if(ls->s[x].l <= y)
@@ -143,14 +166,12 @@ static int ensure(lstack * const restrict ls, int x, int y, int z)
 				// ensure string has enough space
 				if(ls->s[x].s[y].a <= z)
 				{
-					fatal(xrealloc
-						, &ls->s[x].s[y].s
-						, sizeof(ls->s[x].s[y].s[0])
-						, z + 1
-						, ls->s[x].s[y].a
-					);
+					int ns = ls->s[x].s[y].a ?: listwise_allocation_seed;
+					while(ns <= z)
+						ns = ns * 2 + ns / 2;
 
-					ls->s[x].s[y].a = z + 1;
+					fatal(xrealloc, &ls->s[x].s[y].s, sizeof(ls->s[x].s[y].s[0]), ns, ls->s[x].s[y].a);
+					ls->s[x].s[y].a = ns;
 				}
 			}
 		}
@@ -245,6 +266,9 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 	int* ovec = 0;
 	int ovec_len = 0;
 
+	// sanity
+	sanityblock * sb = 0;
+
 	// empty operation for implicit y operator execution
 	operator* yop = op_lookup("y", 1);
 	operator* oop = op_lookup("o", 1);
@@ -274,7 +298,11 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 	if(dump)
 		lstack_dump(*ls);
 
-	lstack_sanity(*ls);
+	if(listwise_sanity)
+	{
+		fatal(sanityblock_create, &sb);
+		fatal(sanity, *ls, sb);
+	}
 
 	// execute all operations
 	int isor = 0;
@@ -302,8 +330,6 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 			if(x)
 				lstack_dump(*ls);
 
-			lstack_sanity(*ls);
-
 			dprintf(listwise_err_fd, "\n");
 			dprintf(listwise_err_fd, " >> %s", g->ops[x]->op->s);
 
@@ -316,6 +342,9 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 
 		// execute the operator
 		fatal(g->ops[x]->op->op_exec, g->ops[x], *ls, &ovec, &ovec_len);
+
+		if(listwise_sanity)
+			fatal(sanity, *ls, sb);
 	}
 
 	if(x && (g->ops[x-1]->op->optype & LWOP_SELECTION_WRITE))
@@ -330,11 +359,81 @@ static int exec_internal(generator* g, char** init, int* initls, int initl, lsta
 	if(dump)
 		lstack_dump(*ls);
 
-	lstack_sanity(*ls);
-
 finally:
 	free(ovec);
+	sanityblock_free(sb);
 coda;
+}
+
+static int deepcopy(lstack * const A, lstack ** const B, int all)
+{
+	int x;
+	int y;
+
+	fatal(xmalloc, B, sizeof(**B));
+
+	if(all)
+	{
+		// copy entire allocations
+		fatal(xmalloc, &(*B)->s, A->a * sizeof(*(*B)->s));
+		(*B)->l = A->l;
+		(*B)->a = A->a;
+
+		for(x = 0; x < A->a; x++)
+		{
+			fatal(xmalloc, &(*B)->s[x].s, A->s[x].a * sizeof(*(*B)->s[0].s));
+			fatal(xmalloc, &(*B)->s[x].t, A->s[x].a * sizeof(*(*B)->s[0].s));
+			(*B)->s[x].l = A->s[x].l;
+			(*B)->s[x].a = A->s[x].a;
+
+			for(y = 0; y < A->s[x].a; y++)
+			{
+				fatal(xmalloc, &(*B)->s[x].s[y].s, (A->s[x].s[y].a));
+				memcpy((*B)->s[x].s[y].s, A->s[x].s[y].s, A->s[x].s[y].a);
+				(*B)->s[x].s[y].l = A->s[x].s[y].l;
+				(*B)->s[x].s[y].a = A->s[x].s[y].a;
+				(*B)->s[x].s[y].type = A->s[x].s[y].type;
+
+				fatal(xmalloc, &(*B)->s[x].t[y].s, (A->s[x].t[y].a));
+				memcpy((*B)->s[x].t[y].s, A->s[x].t[y].s, A->s[x].t[y].a);
+				(*B)->s[x].t[y].l = A->s[x].t[y].l;
+				(*B)->s[x].t[y].a = A->s[x].t[y].a;
+				(*B)->s[x].t[y].w = A->s[x].t[y].w;
+			}
+		}
+	}
+	else
+	{
+		fatal(xmalloc, &(*B)->s, A->l * sizeof(*(*B)->s));
+		(*B)->l = A->l;
+		(*B)->a = A->l;
+
+		for(x = 0; x < A->l; x++)
+		{
+			fatal(xmalloc, &(*B)->s[x].s, A->s[x].l * sizeof(*(*B)->s[0].s));
+			fatal(xmalloc, &(*B)->s[x].t, A->s[x].l * sizeof(*(*B)->s[0].s));
+			(*B)->s[x].l = A->s[x].l;
+			(*B)->s[x].a = A->s[x].l;
+
+			for(y = 0; y < A->s[x].l; y++)
+			{
+				fatal(xmalloc, &(*B)->s[x].s[y].s, (A->s[x].s[y].l + 1));
+				memcpy((*B)->s[x].s[y].s, A->s[x].s[y].s, A->s[x].s[y].l);
+				(*B)->s[x].s[y].l = A->s[x].s[y].l;
+				(*B)->s[x].s[y].a = A->s[x].s[y].l + 1;
+				(*B)->s[x].s[y].type = A->s[x].s[y].type;
+
+				fatal(xmalloc, &(*B)->s[x].t[y].s, (A->s[x].t[y].l + 1));
+				memcpy((*B)->s[x].t[y].s, A->s[x].t[y].s, A->s[x].t[y].l);
+				(*B)->s[x].t[y].l = A->s[x].t[y].l;
+				(*B)->s[x].t[y].a = A->s[x].t[y].l + 1;
+				(*B)->s[x].t[y].w = A->s[x].t[y].w;
+			}
+		}
+	}
+	
+
+	finally : coda;
 }
 
 //
@@ -353,7 +452,7 @@ int API lstack_exec(generator* g, char** init, int* initls, int initl, lstack** 
 
 int API lstack_create(lstack ** const restrict ls)
 {
-	return xmalloc(ls, sizeof**ls);
+	return xmalloc(ls, sizeof(**ls));
 }
 
 void API lstack_free(lstack* ls)
@@ -410,6 +509,11 @@ void API lstack_reset(lstack* ls)
 		ls->l = 0;
 		ls->sel.all = 1;
 	}
+}
+
+int lstack_deepcopy(lstack * const A, lstack ** const B)
+{
+	return deepcopy(A, B, 0);
 }
 
 void API lstack_dump(lstack* ls)
@@ -496,8 +600,7 @@ int API lstack_append(lstack * const restrict ls, int x, int y, const char* cons
 
 	ls->s[x].t[y].w = 0;
 
-finally:
-coda;
+	finally : coda;
 }
 
 int API lstack_appendf(lstack* const restrict ls, int x, int y, const char* const restrict s, ...)
@@ -587,7 +690,7 @@ int API lstack_unshift(lstack* const restrict ls)
 
 	ls->l++;
 
-	// swap new list into position zero
+	// swap an unused list into position zero
 	typeof(ls->s[0]) T = ls->s[ls->l - 1];
 
 	// copy list pointers down
@@ -598,6 +701,9 @@ int API lstack_unshift(lstack* const restrict ls)
 	);
 
 	ls->s[0] = T;
+
+	// reset it
+	ls->s[0].l = 0;
 
 	finally : coda;
 }
@@ -682,17 +788,8 @@ int API lstack_move(lstack * const restrict ls, int ax, int ay, int bx, int by)
 	ls->s[ax].t[ay] = ls->s[bx].t[by];
 
 	// overwrite bx:by, creating a duplicate entry
-	memmove(
-	    &ls->s[bx].s[by]
-		, &ls->s[bx].s[by+1]
-		, (ls->s[bx].l - by - 1) * sizeof(ls->s[0].s[0])
-	);
-
-	memmove(
-		  &ls->s[bx].t[by]
-		, &ls->s[bx].t[by+1]
-		, (ls->s[bx].l - by - 1) * sizeof(ls->s[0].t[0])
-	);
+	memmove(&ls->s[bx].s[by], &ls->s[bx].s[by+1], (ls->s[bx].l - by - 1) * sizeof(ls->s[0].s[0]));
+	memmove(&ls->s[bx].t[by], &ls->s[bx].t[by+1], (ls->s[bx].l - by - 1) * sizeof(ls->s[0].t[0]));
 
 	// overwrite the duplicate entry with the original dest
 	ls->s[bx].s[ls->s[bx].l - 1] = Ts;
@@ -702,6 +799,32 @@ int API lstack_move(lstack * const restrict ls, int ax, int ay, int bx, int by)
 	ls->s[bx].l--;
 
 	return 1;
+}
+
+int API lstack_displace(lstack * const restrict ls, int x, int y, int l)
+{
+	// notice that this is a no-op when l == 0
+	// ensure there are sufficient unused entries beyond s[x].l
+	fatal(lstack_allocate, ls, x, ls->s[x].l + l - 1, -1);
+
+	// copy l allocated entries from beyond s[x].l
+	typeof(ls->s[0].s[0]) * Ts = alloca(l * sizeof(ls->s[0].s[0]));
+	typeof(ls->s[0].t[0]) * Tt = alloca(l * sizeof(ls->s[0].t[0]));
+	memcpy(Ts, &ls->s[x].s[ls->s[x].l], l * sizeof(ls->s[0].s[0]));
+	memcpy(Tt, &ls->s[x].t[ls->s[x].l], l * sizeof(ls->s[0].t[0]));
+
+	// copy entries at y down, creating hole of size l
+	// this also overwrites the entries we just copied
+	memmove(&ls->s[x].s[y + l], &ls->s[x].s[y], (ls->s[x].l - y) * sizeof(ls->s[0].s[0]));
+	memmove(&ls->s[x].t[y + l], &ls->s[x].t[y], (ls->s[x].l - y) * sizeof(ls->s[0].t[0]));
+
+	// copy the l unused entries into the hole
+	memcpy(&ls->s[x].s[y], Ts, l * sizeof(ls->s[0].s[0]));
+	memcpy(&ls->s[x].t[y], Tt, l * sizeof(ls->s[0].t[0]));
+
+	ls->s[x].l += l;
+
+	finally : coda;
 }
 
 int API lstack_delete(lstack * const restrict ls, int x, int y)
@@ -720,12 +843,12 @@ int API lstack_delete(lstack * const restrict ls, int x, int y)
 	memmove(
 			&ls->s[x].t[y]
 		, &ls->s[x].t[y+1]
-		, (ls->s[x].l - x - 1) * sizeof(ls->s[0].t[0])
+		, (ls->s[x].l - y - 1) * sizeof(ls->s[0].t[0])
 	);
 
 	// overwrite the duplicated entry with the current entry
 	ls->s[x].s[ls->s[x].l - 1] = Ts;
-	ls->s[x].s[ls->s[x].l - 1] = Ts;
+	ls->s[x].t[ls->s[x].l - 1] = Tt;
 
 	ls->s[x].l--;
 
@@ -792,37 +915,84 @@ charstar API lstack_getstring(lstack* const restrict ls, int x, int y)
 	return ls->s[x].t[y].s;
 }
 
-void lstack_sanity(lstack * const restrict ls)
+int sanityblock_create(sanityblock ** const sb)
+{
+	fatal(xmalloc, sb, sizeof(**sb));
+
+	finally : coda;
+}
+
+void sanityblock_reset(sanityblock * const sb)
+{
+	int x;
+	for(x = 0; x < sb->s_stringsl; x++)
+		sb->s_strings[x].ol = 0;
+
+	sb->s_stringsl = 0;
+}
+
+void sanityblock_free(sanityblock * const sb)
+{
+	if(sb)
+	{
+		free(sb->s_strings);
+	}
+	free(sb);
+}
+
+int sanity(lstack * const restrict ls, sanityblock * const restrict sb)
 {
 	int R = 0;
 
-#define err(...) dprintf(listwise_err_fd, __VA_ARGS__); R++
+#define err(fmt, ...) dprintf(listwise_err_fd, fmt "\n", ##__VA_ARGS__); R++
+
+uint64_t totlists = 0;
+uint64_t totstrings = 0;
+uint64_t totcompares = 0;
 
 	int ax;
 	int ay;
 	int bx;
 	int by;
-	for(ax = 0; ax < ls->l; ax++)
+	for(ax = 0; ax < ls->a; ax++)
 	{
-		for(ay = 0; ay < ls->s[ax].l; ay++)
+		if(ls->s[ax].s)
 		{
-			for(bx = 0; bx < ls->l; bx++)
+totlists++;
+			for(ay = 0; ay < ls->s[ax].a; ay++)
 			{
-				if(ax != bx)
+				if(ls->s[ax].s[ay].s)
 				{
-					if(ls->s[ax].s == ls->s[bx].s)
+totstrings++;
+					for(bx = 0; bx < ls->a; bx++)
 					{
-						err("duplicate lists %p a=[%d] b=[%d]\n", ls->s[ax].s, ax, bx);
-					}
-				}
-
-				for(by = 0; by < ls->s[bx].l; by++)
-				{
-					if(ax != bx || ay != by)
-					{
-						if(ls->s[ax].s[ay].s == ls->s[bx].s[by].s)
+						if(ls->s[bx].s)
 						{
-							err("duplicate strings %p a=[%d,%d] b=[%d,%d]\n", ls->s[ax].s[ay].s, ax, ay, bx, by);
+							if(ax != bx)
+							{
+								if(ls->s[ax].s == ls->s[bx].s)
+								{
+									err("duplicate lists %p a=[%d] b=[%d]", ls->s[ax].s, ax, bx);
+								}
+
+								for(by = 0; by < ls->s[bx].a; by++)
+								{
+									if(ls->s[bx].s)
+									{
+										if(ay != by)
+										{
+totcompares++;
+											if(ls->s[bx].s[by].s)
+											{
+												if(ls->s[ax].s[ay].s == ls->s[bx].s[by].s)
+												{
+													err("duplicate strings %p @ a=[%d:%d] b=[%d:%d]", ls->s[ax].s[ay].s, ax, ay, bx, by);
+												}
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -830,6 +1000,118 @@ void lstack_sanity(lstack * const restrict ls)
 		}
 	}
 
+	int x;
+	int y;
+
+	// compare previous list of strings/objects to new list, detect loss
+	for(x = 0; x < sb->s_stringsl; x++)
+	{
+		// check its old location, first
+		typeof(sb->s_strings[0]) * sbs = &sb->s_strings[x];
+
+		if(ls->s[sbs->x].s[sbs->y].s == sbs->s)
+		{
+			ax = sbs->x;
+			ay = sbs->y;
+		}
+		else
+		{
+			for(ax = 0; ax < ls->a; ax++)
+			{
+				for(ay = 0; ay < ls->s[ax].a; ay++)
+				{
+					if(ls->s[ax].s[ay].s == sbs->s)
+						break;
+				}
+				if(ay < ls->s[ax].a)
+					break;
+			}
+		}
+		if(ax >= ls->a)
+		{
+			err("LOSS %p", sbs->s);
+			err(" -> %6s : %d", "x", sbs->x);
+			err(" -> %6s : %d", "y", sbs->y);
+			err(" -> %6s : %d", "l", sbs->l);
+			err(" -> %6s : %d", "a", sbs->a);
+			err(" -> %6s : %hhu", "t", sbs->t);
+
+			if(sbs->t)
+			{
+				listwise_object* o = idx_lookup_val(object_registry.by_type, &sbs->t, 0);
+				if(o)
+				{
+					char * s;
+					int sl;
+					o->string(*(void**)sbs->o, o->string_property, &s, &sl);
+
+					if(s)
+					{
+						err(" -> %6s : [%hhu]%p (%.*s)", "value", sbs->t, *(void**)sbs->o, sl, s);
+					}
+					else
+					{
+						err(" -> %6s : [%hhu]%p NOVALUE", "value", sbs->t, *(void**)sbs->o);
+					}
+				}
+				else
+				{
+					err(" -> %6s : [NOTYPE]", "value");
+				}
+			}
+			else
+			{
+				err(" -> %6s : '%.*s'", "value", sbs->l, sbs->o);
+			}
+		}
+	}
+
+	sanityblock_reset(sb);
+
+	// flat list of all strings/objects in the lstack
+	for(x = 0; x < ls->a; x++)
+	{
+		for(y = 0; y < ls->s[x].a; y++)
+		{
+			if(ls->s[x].s[y].s)
+			{
+				if(sb->s_stringsl == sb->s_stringsa)
+				{
+					int ns = sb->s_stringsa ?: 10;
+					ns = ns * 2 + ns / 2;
+					fatal(xrealloc, &sb->s_strings, sizeof(*sb->s_strings), ns, sb->s_stringsa);
+					sb->s_stringsa = ns;
+				}
+
+				typeof(sb->s_strings[0]) * sbs = &sb->s_strings[sb->s_stringsl++];
+
+				sbs->s = ls->s[x].s[y].s;
+				sbs->l = ls->s[x].s[y].l;
+				sbs->a = ls->s[x].s[y].a;
+				sbs->t = ls->s[x].s[y].type;
+				sbs->x = x;
+				sbs->y = y;
+
+				if(sbs->oa <= ls->s[x].s[y].l)
+				{
+					int ns = sbs->oa ?: 10;
+					while(ns <= ls->s[x].s[y].l)
+						ns = ns * 2 + ns / 2;
+					
+					fatal(xrealloc, &sbs->o, sizeof(*sbs->o), ns, sbs->oa);
+					sbs->oa = ns;
+				}
+
+				memcpy(sbs->o, ls->s[x].s[y].s, ls->s[x].s[y].l);
+				sbs->ol = ls->s[x].s[y].l;
+			}
+		}
+	}
+
+	dprintf(listwise_err_fd, "SANITY : %3lu lists @ %6.2f apiece, %5d strings, compares : %lu\n", totlists, ((double)totstrings) / ((double)ls->a), sb->s_stringsl, totcompares);
+
 	if(R)
 		exit(1);
+
+	finally : coda;
 }

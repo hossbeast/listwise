@@ -145,6 +145,7 @@ int listwise_lookup_object(uint8_t type, listwise_object ** obj);
 //
 int lstack_obj_write(lstack* const restrict ls, int x, int y, const void* const restrict o, uint8_t type)
 	__attribute__((nonnull));
+
 int lstack_obj_write_alt(lstack* const restrict ls, int x, int y, const void* const restrict o, uint8_t type)
 	__attribute__((nonnull));
 

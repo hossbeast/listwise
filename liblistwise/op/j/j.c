@@ -75,9 +75,9 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 		// reallocate accumulator if necessary
 		if((nl + dl + ls->s[0].s[x].l) >= na)
 		{
-			int sz = na;
-			while((nl + dl + ls->s[0].s[x].l) >= sz)
-				sz = sz ? (sz * 2) + (sz / 2) : 10;
+			int sz = na ?: 10;
+			while(sz <= (nl + dl + ls->s[0].s[x].l))
+				sz = sz * 2 + sz / 2;
 
 			char * tmp = ns;
 			ns = alloca(sz);

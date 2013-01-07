@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <listwise/operator.h>
+#include <listwise/lstack.h>
 
 #include "control.h"
 #include "xmem.h"
@@ -48,110 +49,45 @@ int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 	if(o->argsl)
 		N = o->args[0]->i64;
 
-	int x = 0;
+	int go = 0;
 	int c = 0;
-	int i = 0;
-
-	if(ls->sel.all)
-		c = ls->s[0].l;
-	else
-	{
-		for(x = 0; x < ls->s[0].l; x++)
-		{
-			if(ls->sel.sl <= (x/8))	// could not be selected
-				break;
-
-			if(ls->sel.s[x/8] & (0x01 << (x%8)))
-				c++;
-		}
-	}
-
-	// preallocate additional entries
 	int k = ls->s[0].l;
-	fatal(lstack_ensure, ls, 0, ls->s[0].l + (c * N) - 1, 0);
 
-	for(x = k - 1; x >= 0; x--)
+	int x;
+	LSTACK_ITERREV(ls, x, go);
+	if(go)
 	{
-		int go = 1;
-		if(!ls->sel.all)
+		// prepare N entries at x+1 for writing
+		fatal(lstack_displace, ls, 0, x + 1, N);
+		
+		int y;
+		for(y = 1; y <= N; y++)
 		{
-			go = 0;
-			if(ls->sel.sl > (x/8))	// could not be selected
+			if(ls->s[0].s[x].type)
 			{
-				go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
+				fatal(lstack_obj_write_alt, ls, 0, x+y, *(void**)ls->s[0].s[x].s, ls->s[0].s[x].type);
 			}
-		}
-
-		if(go)
-		{
-			// move following entries down to make space
-			memmove(
-				  &ls->s[0].s[x + N + 1]
-				, &ls->s[0].s[x + 1]
-				, ((k - x - 1) + i) * sizeof(ls->s[0].s[0])
-			);
-
-			memmove(
-				  &ls->s[0].t[x + N + 1]
-				, &ls->s[0].t[x + 1]
-				, ((k - x - 1) + i) * sizeof(ls->s[0].t[0])
-			);
-
-			int y;
-			for(y = 1; y <= N; y++)
+			else
 			{
-				// duplicate contents into new entry
-				ls->s[0].s[x+y] = ls->s[0].s[x];
-				if(ls->s[0].s[x+y].s)
-				{
-					if(ls->s[0].s[x+y].type)
-					{
-						fatal(xmalloc, &ls->s[0].s[x+y].s, sizeof(void*));
-						memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, sizeof(void*));
-					}
-					else
-					{
-						fatal(xmalloc, &ls->s[0].s[x+y].s, ls->s[0].s[x].l + 1);
-						memcpy(ls->s[0].s[x+y].s, ls->s[0].s[x].s, ls->s[0].s[x].l);
-					}
-				}
-
-				ls->s[0].t[x+y] = ls->s[0].t[x];
-				if(ls->s[0].t[x+y].s)
-				{
-					fatal(xmalloc, &ls->s[0].t[x+y].s, ls->s[0].t[x].l + 1);
-					memcpy(ls->s[0].t[x+y].s, ls->s[0].t[x].s, ls->s[0].t[x].l);
-				}
+				fatal(lstack_write_alt, ls, 0, x+y, ls->s[0].s[x].s, ls->s[0].s[x].l);
 			}
-
-			i += N;
 		}
 	}
+	LSTACK_ITEREND;
 
-	c = 0;
-	for(x = 0; x < k; x++)
+	LSTACK_ITERATE(ls, x, go);
+	if(x < k)
 	{
-		int go = 1;
-		if(!ls->sel.all)
-		{
-			go = 0;
-			if(ls->sel.sl > (x/8))	// could not be selected
-			{
-				go = (ls->sel.s[x/8] & (0x01 << (x%8)));	// whether it is selected
-			}
-		}
-
 		if(go)
 		{
 			int y;
 			for(y = 0; y <= N; y++)
-			{
 				fatal(lstack_last_set, ls, x + y + c);
-			}
 
 			c += N;
 		}
 	}
+	LSTACK_ITEREND;
 
 	finally : coda;
 }
