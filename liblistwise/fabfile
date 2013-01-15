@@ -5,10 +5,10 @@ LIB			= [ liblistwise.so ]		# name of the library
 CC			= [ gcc ]
 FLEX		= [ flex ]
 BISON		= [ bison ]
-CFLAGS	= [ -m64 -O3 -g -Werror -D_GNU_SOURCE -fPIC [ $# ] =>> lsr/xm/<h>/rp/dn/ss/u/s/^/-I ]
+CFLAGS	= [ -m64 -O3 -g -Werror -D_GNU_SOURCE -fPIC [ $# ] =>> lsr/xm/<h>/dn/ss/u/s/^/-I ]
 LFLAGS	= [ -lpcre -ldl -shared -Wl,--version-script=exports [ -Wl,-soname, $LIB ] =>> j ]
 
-SRCDIR	= [ $# ] 								# directory this makefile resides in
+SRCDIR	= [ $# ] 								# directory this fabfile resides in
 DESTDIR	= [ / ]									# directory to install to
 INCDIR	= [ usr/include ]				# directory for .h's
 LIBDIR	= [ usr/lib ]						# directory for .so's
