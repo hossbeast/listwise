@@ -48,22 +48,13 @@ lsr     directory LiSting (Recursive)
 /* jm		 join lists - regex */
 /*       (set) intersect - jw on whole string */
 /*       (set) union - same as c */
-/* p		 select previous to first selected
-/* f		 select following the last selected
 /* ext   file name extension */
 /*       replace bn/dp with window on '/' delimited sections */
-/*       append
-/*       prepend
-/* a     apply
-/* f     fix
-/*       duplicate top list
+/*       append text to each entry
+/*       prepend text to each entry
 
-/* convert list into a stack, one single-element list per item
 /* apply the following operation to all lists on the stack
 /* apply previous operation to all lists on the stack
-/* duplicate selected items (N times)
-/* match by extension
-/* replace extension with other extension
 
 /*    aggregate math operations    */
 /* sum/avg/stddev - push, write 1 entry with results */

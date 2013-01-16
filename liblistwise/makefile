@@ -13,7 +13,7 @@ NAME             =listwise
 L_NAME           =lib${NAME}
 LIB              =${L_NAME}.so
 INCDIR           =/usr/include
-LIBDIR          ?=/usr/lib
+LIBDIR          ?=/usr/lib64
 DLIBDIR         ?=/usr/lib
 VER              =0.1
 
@@ -41,7 +41,7 @@ SOURCES					+=generator/generator.tab.c
 #  C/L OPTS  - internal to makefile flags
 #  C/L FLAGS - user specified compiler flags
 # 
-COPTS						+=-m64 -O0 -g3 -Werror -D_GNU_SOURCE -fPIC -I${SRCDIR} -I${SRCDIR}/common -I${SRCDIR}/re -I${SRCDIR}/generator
+COPTS						+=-m64 -O3 -Werror -D_GNU_SOURCE -fPIC -I${SRCDIR} -I${SRCDIR}/common -I${SRCDIR}/re -I${SRCDIR}/generator
 LOPTS            =-lpcre -ldl -shared -Wl,--version-script=exports -Wl,-soname,${LIB}
 
 %.o : COPTS     +=-c

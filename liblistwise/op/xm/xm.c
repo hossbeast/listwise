@@ -12,15 +12,15 @@ xm operator - Match by filename eXtension
 
 ARGUMENTS
 
-  0   - extension
-  [1] - full extension match
+  [0] - full extension match
+  1   - extension
 
 OPERATION
 
 	1. foreach item in selection, or, if no selection, in top list
   2. 
-	   2.1 [normal mode] select that item if its stringvalue ends with "." extension
-     2.2 [full match mode] select that item if its stringvalue has a complete extension equal to
+	   2.1 [default mode]    select that item if its stringvalue ends with "." extension
+     2.2 [full match mode] select that item if its stringvalue has a complete extension equal to extension
 
 */
 
@@ -44,12 +44,22 @@ int op_validate(operation* o)
 
 int op_exec(operation* o, lstack* ls, int** ovec, int* ovec_len)
 {
-	char* xs = o->args[0]->s;
-	int xl = o->args[0]->l;
+	char* xs;
+	int xl;
 
 	int fullmatch = 0;
-	if(o->argsl > 1)
-		fullmatch = o->args[1]->i64;
+	if(o->args[0]->itype == ITYPE_I64)
+	{
+		fullmatch = o->args[0]->i64;
+
+		xs = o->args[1]->s;
+		xl = o->args[1]->l;
+	}
+	else
+	{
+		xs = o->args[0]->s;
+		xl = o->args[0]->l;
+	}
 
 	int x;
 	for(x = 0; x < ls->s[0].l; x++)
