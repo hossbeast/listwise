@@ -31,14 +31,14 @@ CODA_FINALLY
 // SUMMARY
 //  log an L_ERROR message
 //
-#define error(fmt, ...)									\
-	do {																	\
-		dprintf(listwise_err_fd, fmt " at [%s:%d (%s)]"	\
-			, ##__VA_ARGS__										\
-			, __FILE__												\
-			, __LINE__												\
-			, __FUNCTION__										\
-		);																	\
+#define error(fmt, ...)																\
+	do {																								\
+		dprintf(listwise_err_fd, fmt " at [%s:%d (%s)]\n"	\
+			, ##__VA_ARGS__																	\
+			, __FILE__																			\
+			, __LINE__																			\
+			, __FUNCTION__																	\
+		);																								\
 	} while(0)
 
 /// fail
@@ -46,10 +46,10 @@ CODA_FINALLY
 // SUMMARY
 //  log an L_ERROR message, terminate the current scope with failure
 //
-#define fail(fmt, ...)					\
-	do {													\
-		error(fmt, ##__VA_ARGS__);	\
-		goto CODA;									\
+#define fail(fmt, ...)							\
+	do {															\
+		error(fmt "\n", ##__VA_ARGS__);	\
+		goto CODA;											\
 	} while(0)
 
 /// qfail

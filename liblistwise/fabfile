@@ -91,19 +91,19 @@ all : [ $LIB $OPLIST ]
 }
 
 # compile .o from .lex.c
-[ $SRCDIR ] =>> lsr/xs/<l>/<lex.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<lex.c>
+[ $SRCDIR ] =>> lsr/xs/<l>/<lex.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/1/<lex.c>
 {
 	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
 }
 
 # compile .o from .tab.c
-[ $SRCDIR ] =>> lsr/xs/<y>/<tab.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/<tab.c>
+[ $SRCDIR ] =>> lsr/xs/<y>/<tab.o>/y/dj/shift/pop :: [ $< ] =>> rx/xs/1/<tab.c>
 {
 	[ $CC $CFLAGS ] -c [ $@ ] =>> rx/ineed/xm/<c>/ss/u -o [ $@ ]
 }
 
 # flex - create .lex.c and .lex.h from a .l
-[ $SRCDIR ] =>> lsr/xs/<l>/lex.c/y/v/d/cp/u/xs/lex.c/lex.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/<l>/ss/u
+[ $SRCDIR ] =>> lsr/xs/<l>/lex.c/y/v/d/cp/u/xs/lex.c/lex.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/1/<l>/ss/u
 {
 	[ $FLEX -o [ $@ ] =>> h/1/1/rx ]									\
 	[ --header-file= [ $@ ] =>> h/0/1/rx ] =>> j			\
@@ -111,7 +111,7 @@ all : [ $LIB $OPLIST ]
 }
 
 ## bison - create .tab.c and .tab.h from a .y
-[ $SRCDIR ] =>> lsr/xs/<y>/tab.c/y/v/d/cp/u/xs/tab.c/tab.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/<y>/ss/u
+[ $SRCDIR ] =>> lsr/xs/<y>/tab.c/y/v/d/cp/u/xs/tab.c/tab.h/z/v/dj/2/shift/pop/2 :: [ $< ] =>> rx/xs/1/<y>/ss/u
 {
 	[ $BISON --warnings=error -o ]		\
 	[ $@ ] =>> h/1/1									\
