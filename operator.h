@@ -33,6 +33,7 @@ enum
 	, LWOP_OPERATION_INPLACE			= 0x0040			// modifies the string in the top list in-place
 	, LWOP_OPERATION_FILESYSTEM		= 0x0080			// filesystem operator
 	, LWOP_OBJECT_NO							= 0x0100			// operator ignores object entries
+	, LWOP_EMPTYSTACK_YES					= 0x0200			// operator invoked even in the context of an empty stack
 };
 
 //
