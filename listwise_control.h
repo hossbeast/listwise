@@ -21,16 +21,19 @@
 #include "control_core.h"
 #include "listwise/xtra.h"
 
+#if UNWIND
+# define UNWIND_ERRORS listwise_errors_unwind
+#else
+# define UNWIND_ERRORS 0
+#endif
+
 #define CODA_BAD_ACTION                             \
-	if(listwise_errors_unwind)												\
-		_coda_r = 1;																		\
-	else																							\
-		_coda_r = -1;																		\
+	_coda_r = FAILURE_CODE
 
 #define CODA_GOOD_ACTION                            \
   _coda_r = 0;                                      \
 
-#define HANDLE_ERROR(fmt, ...)											\
+#define LOG_ERROR(fmt, ...)													\
 	printf(fmt "\n"																		\
 		, ##__VA_ARGS__																	\
 	);																								\
