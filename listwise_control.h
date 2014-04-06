@@ -19,7 +19,6 @@
 #define _LISTWISE_CONTROL_H
 
 #include "control_core.h"
-#include "listwise/xtra.h"
 
 #if UNWIND
 # define UNWIND_ERRORS listwise_errors_unwind
