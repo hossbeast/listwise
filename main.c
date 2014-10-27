@@ -73,7 +73,7 @@ void listwise_log(void * token, void * udata, const char * func, const char * fi
 //
 // PARAMETERS
 //  path - path to file to load
-//  mem  - contents returned here
+//  mem  - append contents here
 //
 static int snarf(char * path, pstring ** mem)
 {
@@ -83,7 +83,6 @@ static int snarf(char * path, pstring ** mem)
 	if(strcmp(path, "-") == 0)
 		path = "/dev/fd/0";
 
-	fatal(psclear, mem);
 	fatal(xopen, path, O_RDONLY | O_NONBLOCK, &fd);
 	fatal(xfstat, fd, &st);
 
@@ -127,7 +126,6 @@ finally:
 coda;
 }
 
-
 // setup liblistwise logging
 static struct listwise_logging * logging = (struct listwise_logging[]) {{
 		.generator_token	= (uint64_t[]) { L_LWPARSE }
@@ -162,6 +160,7 @@ int main(int g_argc, char** g_argv)
 
 	pstring * args_remnant = 0;	// concatenated unprocessed arguments
 	pstring * temp = 0;
+	pstring *	transform = 0;
 
 	generator* g = 0;						// generator
 	lwx * lx = 0;								// list stack
@@ -194,78 +193,106 @@ int main(int g_argc, char** g_argv)
 	fatal(log_config, L_LWOPINFO);		// prefix
 #endif
 
-	// listwise setup
-//	fatal(listwise_operators_setup);
-
 	// setup liblistwise logging
 	listwise_logging_configure(logging);
 
-	if(g_args.generator_file)
-	{
-		// read transform-file
-		fatal(snarf, g_args.generator_file, &temp);
-	}
+	// allocate lstack
+	fatal(lwx_alloc, &lx);
 
-	if(args_remnant && args_remnant->l)
+	// read transform-string from stdin
+	if(g_args.stdin_init_list_items)
 	{
-		// transform-string from argv
-		fatal(pscatw, &temp, args_remnant->s, args_remnant->l);
-	}
+		fatal(psclear, &temp);
+		fatal(snarf, "-", &temp);
 
-	if(temp)
-	{
-#if DEVEL
-		fatal(generator_parse2, 0, temp->s, temp->l, &g, 0);
-#else
-		fatal(generator_parse, 0, temp->s, temp->l, &g);
-#endif
-	}
+		char delim = g_args.stdin_linewise ? '\n' : 0;
 
-	// attempt to read initial list items from stdin and a specified file
-	int x;
-	for(x = 0; x < 2; x++)
-	{
-		char * p = 0;
-		if(x == 0 && (g_args.generator_file == 0 || strcmp(g_args.generator_file, "-") == 0 || strcmp(g_args.generator_file, "/dev/fd/0") == 0))
-			p = "-";
-		if(x == 1)
-			p = g_args.init_file;
-
-		if(p)
+		char * s[2] = { temp->s, 0 };
+		while((s[1] = memchr(s[0], delim, temp->l - (s[0] - ((char*)temp->s)))))
 		{
-			// read in the specified file
-			fatal(snarf, p, &temp);
+			if(s[1] - s[0])
+				fatal(lstack_addw, lx, s[0], s[1] - s[0]);
 
+			s[0] = s[1] + 1;
+		}
+	}
+
+	// read transform-string and init-items
+	int x;
+	for(x = 0; x < g_args.inputsl; x++)
+	{
+		if(g_args.inputs[x].kind == KIND_INIT_LIST_ITEM)
+		{
+			fatal(lstack_adds, lx, g_args.inputs[x].s);
+		}
+		else if(g_args.inputs[x].kind == KIND_INIT_LIST_FILE)
+		{
+			fatal(psclear, &temp);
+			fatal(snarf, g_args.inputs[x].s, &temp);
+
+			char delim = g_args.inputs[x].linewise ? '\n' : 0;
+
+			char * s[2] = { temp->s, 0 };
+			while((s[1] = memchr(s[0], delim, temp->l - (s[0] - ((char*)temp->s)))))
+			{
+				if(s[1] - s[0])
+					fatal(lstack_addw, lx, s[0], s[1] - s[0]);
+
+				s[0] = s[1] + 1;
+			}
+		}
+		else if(g_args.inputs[x].kind == KIND_TRANSFORM_FILE)
+		{
+			fatal(snarf, g_args.inputs[x].s, &transform);
+		}
+		else if(g_args.inputs[x].kind == KIND_INPUT_FILE)
+		{
+			fatal(psclear, &temp);
+			fatal(snarf, g_args.inputs[x].s, &temp);
+
+			// read transform-string until 3 consecutive newlines
 			char * s[2] = { temp->s, 0 };
 			while((s[1] = memchr(s[0], '\n', temp->l - (s[0] - ((char*)temp->s)))))
 			{
-				if(s[1] - s[0])
-				{
-					if(g_args.init_listl == g_args.init_lista)
-					{
-						int ns = g_args.init_lista ?: 10;
-						ns = ns * 2 + ns / 2;
+				int dl = 0;
+				while(s[1][dl] == '\n' && temp->l > ((s[1] - ((char*)temp->s)) + dl))
+					dl++;
 
-						fatal(xrealloc, &g_args.init_list, sizeof(*g_args.init_list), ns, g_args.init_lista);
-						fatal(xrealloc, &g_args.init_list_lens, sizeof(*g_args.init_list_lens), ns, g_args.init_lista);
-						g_args.init_lista = ns;
-					}
-					fatal(ixstrndup, &g_args.init_list[g_args.init_listl], s[0], s[1] - s[0]);
-					g_args.init_list_lens[g_args.init_listl] = s[1] - s[0];
-					g_args.init_listl++;
-				}
+				if(dl > 2)
+					break;
+
+				if(s[1] - s[0])
+					fatal(pscatw, &transform, s[0], s[1] - s[0]);
+
+				s[0] = s[1] + 1;
+			}
+
+			// read init-list-items
+			char delim = g_args.inputs[x].linewise ? '\n' : 0;
+			while((s[1] = memchr(s[0], delim, temp->l - (s[0] - ((char*)temp->s)))))
+			{
+				if(s[1] - s[0])
+					fatal(lstack_addw, lx, s[0], s[1] - s[0]);
+
 				s[0] = s[1] + 1;
 			}
 		}
 	}
 
-	fatal(lwx_alloc, &lx);
+	// append transform-string from argv
+	if(args_remnant && args_remnant->l)
+		fatal(pscatw, &transform, args_remnant->s, args_remnant->l);
 
-	for(x = 0; x < g_args.init_listl; x++)
+	if(transform)
 	{
-		fatal(lstack_writew, lx, 0, x, g_args.init_list[x], g_args.init_list_lens[x]);
+#if DEVEL
+		fatal(generator_parse2, 0, transform->s, transform->l, &g, 0);
+#else
+		fatal(generator_parse, 0, transform->s, transform->l, &g);
+#endif
 	}
 
+	// execute
 	if(g)
 	{
 		fatal(listwise_exec_generator2, g, 0, 0, 0, &lx, 0);
@@ -339,9 +366,8 @@ finally:
 	generator_free(g);
 	args_teardown();
 	psfree(temp);
+	psfree(transform);
 	psfree(args_remnant);
-
-//	listwise_operators_teardown();
 
 	if(XAPI_UNWINDING)
 	{

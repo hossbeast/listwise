@@ -47,22 +47,49 @@ MODE_TABLE_DEVEL(0)
 
 struct g_args_t
 {
-	char		numbering;				// -n=1(0..n), -N=2(list index)
-	char		in_null;					// -0
-	char		out_null;					// -z
-	char		out_stack;				// -k
-	char		out_list;					// -a
-	char *	generator_file;		// -f/-
-	char *	init_file;				// -l
+	char		numbering;									// -n=1(0..n), -N=2(list index)
+	char		out_null;										// -z
+	char		out_stack;									// -k
+	char		out_list;										// -a
 
-	char **	init_list;				// -i 
-	int *		init_list_lens;		// -i 
-	int			init_listl;				// -i
-	int			init_lista;				// -i
+	int			stdin_init_list_items;
+	int			stdin_linewise;
+
+	struct
+	{
+		char *	s;
+		int			linewise;
+#define KIND_INIT_LIST_ITEM	1		/* -i */
+#define KIND_INIT_LIST_FILE	2		/* -l */
+#define KIND_TRANSFORM_FILE	3		/* -t */
+#define KIND_INPUT_FILE			4		/* -f */
+		int			kind;
+	} *			inputs;
+	size_t	inputsl;
+
+/*
+	char *	linewise_init_list_files;		// -l
+	int			linewise_init_list_filesl;
+	char *	nullwise_init_list_files;
+	int			nullwise_init_list_filesl;
+	char **	linewise_transform_files;		// -t/-
+	int			linewise_transform_filesl;
+	char **	nullwise_transform_files;
+	int			nullwise_transform_filesl;
+	char **	linewise_input_files;				// -f/-
+	int			linewise_input_filesl;
+	char **	nullwise_input_files;
+	int			nullwise_input_filesl;
+
+	char **	init_list;									// -i 
+	int *		init_list_lens;
+	int			init_listl;
+	int			init_lista;
+*/
 
 #if DEVEL
-	int			mode_backtrace;		// backtrace reporting mode
-	int			mode_logtrace;		// logtrace mode
+	int			mode_backtrace;							// backtrace reporting mode
+	int			mode_logtrace;							// logtrace mode
 #endif
 } g_args;
 
