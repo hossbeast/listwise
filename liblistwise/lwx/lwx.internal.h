@@ -26,13 +26,13 @@
 // SUMMARY
 //  initialize the component
 //
-xapi lwx_setup();
+xapi lwx_setup(void);
 
 /// lwx_teardown
 //
 // SUMMARY
 //  free resources used by the component
 //
-void lwx_teardown();
+void lwx_teardown(void);
 
 #endif
