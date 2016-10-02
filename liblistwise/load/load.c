@@ -18,13 +18,20 @@
 #include <stdio.h>
 
 #include "xapi.h"
+#include "logger/load.h"
+#include "narrator/load.h"
+#include "xlinux/load.h"
+#include "lorien/load.h"
+#include "yyutil/load.h"
+#include "valyria/load.h"
+
 #include "xapi/errtab.h"
-#include "xlinux.h"
-#include "xlinux/LIB.errtab.h"
+#include "xapi/SYS.errtab.h"
 #include "narrator.h"
 #include "logger.h"
 
 #include "internal.h"
+#include "load.internal.h"
 #include "errtab/PCRE.errtab.h"
 #include "errtab/LISTWISE.errtab.h"
 #include "operators.internal.h"
@@ -47,14 +54,19 @@ API xapi listwise_load()
   if(handles == 0)
   {
     // dependencies
-    fatal(xlinux_load);
-    fatal(narrator_load);
     fatal(logger_load);
+    fatal(lorien_load);
+    fatal(narrator_load);
+    fatal(valyria_load);
+    fatal(xlinux_load);
+    fatal(yyutil_load);
 
     // modules
     fatal(operators_setup);
     fatal(lwx_setup);
     fatal(logging_setup);
+
+    // error tables
 #ifndef XAPI_MODE_ERRORCODE
     fatal(xapi_errtab_register, perrtab_PCRE);
     fatal(xapi_errtab_register, perrtab_LISTWISE);
@@ -72,18 +84,22 @@ API xapi listwise_unload()
   if(--handles == 0)
   {
     // modules
-    object_teardown();
+    fatal(object_cleanup);
     lwx_teardown();
     fatal(operators_release);
 
     // dependencies
-    fatal(xlinux_unload);
-    fatal(narrator_unload);
     fatal(logger_unload);
+    fatal(lorien_unload);
+    fatal(narrator_unload);
+    fatal(valyria_unload);
+    fatal(xlinux_unload);
+    fatal(yyutil_unload);
+
   }
   else if(handles < 0)
   {
-    tfails(perrtab_LIB, LIB_AUNLOAD, "library", "liblistwise");
+    fails(SYS_AUNLOAD, "library", "liblistwise");
   }
 
   finally : coda;
@@ -91,4 +107,4 @@ API xapi listwise_unload()
 
 // * my dependencies are not unloaded until I am unloaded
 // * failure to load means handles are not incremeneted, and unload will be no-op
-// * I can only unload if I and my dependencies loaded successfully
+// * I can only unload if I and my dependencies were loaded successfully
